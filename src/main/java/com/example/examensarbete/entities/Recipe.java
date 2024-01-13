@@ -11,6 +11,7 @@ import org.hibernate.proxy.HibernateProxy;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,7 +25,7 @@ public class Recipe implements Serializable {
     private Integer recipeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,10 +53,10 @@ public class Recipe implements Serializable {
     @Column(name = "servings")
     private Integer servings;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy="recipe")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "recipe")
     private Set<Instruction> instructions = new HashSet();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
     private Set<RecipeIngredient> recipeIngredients = new HashSet();
 
     @Column(name = "img_url")
