@@ -1,2 +1,4 @@
-package com.example.examensarbete.dto;public record UserDto() {
+package com.example.examensarbete.dto;
+
+public record UserDto() {
 }
