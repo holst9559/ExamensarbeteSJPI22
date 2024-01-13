@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+
 import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.service.IngredientService;
@@ -16,6 +17,7 @@ public class IngredientController {
     public IngredientController(IngredientService ingredientService){
         this.ingredientService = ingredientService;
     }
+
 
     @GetMapping
     public List<Ingredient> getAllIngredients(){
@@ -41,13 +43,6 @@ public class IngredientController {
     public String deleteIngredient(@PathVariable int id){
         ingredientService.deleteIngredient(id);
         return "Ingredient with id: " + id + " was deleted.";
-    }
-
-    @GetMapping("/new")
-    public Ingredient fetchNewIngredient(@RequestParam String ingredient){
-        String newIngredient = ingredientService.fetchNewIngredient(ingredient);
-
-        return ingredientService.addNewIngredient(newIngredient);
     }
 
 }
