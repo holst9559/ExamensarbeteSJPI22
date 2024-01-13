@@ -43,4 +43,11 @@ public class IngredientController {
         return "Ingredient with id: " + id + " was deleted.";
     }
 
+    @GetMapping("/new")
+    public Ingredient fetchNewIngredient(@RequestParam String ingredient){
+        String newIngredient = ingredientService.fetchNewIngredient(ingredient);
+
+        return ingredientService.addNewIngredient(newIngredient);
+    }
+
 }
