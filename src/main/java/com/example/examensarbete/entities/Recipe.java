@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "RECIPE")
 public class Recipe implements Serializable {
     @Id
@@ -64,6 +66,20 @@ public class Recipe implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "diet_id")
     private Diet diet;
+
+    public Recipe(User user, Dish dish, Category category, String description, Integer prepTime, Integer cookTime, Integer servings, Set<Instruction> instructions, Set<RecipeIngredient> recipeIngredients, String imgUrl, Diet diet) {
+        this.user = user;
+        this.dish = dish;
+        this.category = category;
+        this.description = description;
+        this.prepTime = prepTime;
+        this.cookTime = cookTime;
+        this.servings = servings;
+        this.instructions = instructions;
+        this.recipeIngredients = recipeIngredients;
+        this.imgUrl = imgUrl;
+        this.diet = diet;
+    }
 
     @Override
     public final boolean equals(Object o) {
