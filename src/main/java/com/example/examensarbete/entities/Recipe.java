@@ -73,7 +73,7 @@ public class Recipe implements Serializable {
         Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
         Recipe recipe = (Recipe) o;
-        return getRecipeId() != null && Objects.equals(getRecipeId(), recipe.getRecipeId());
+        return getId() != null && Objects.equals(getId(), recipe.getId());
     }
 
     @Override
