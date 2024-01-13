@@ -96,4 +96,16 @@ public class Recipe implements Serializable {
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
+
+    private int calculateTotalTime(int prepTime, int cookTime){
+        return prepTime + cookTime;
+    }
+
+    private void addIngredient(RecipeIngredient recipeIngredient){
+        recipeIngredients.add(recipeIngredient);
+    }
+
+    private void addInstruction(Instruction instruction){
+        instructions.add(instruction);
+    }
 }
