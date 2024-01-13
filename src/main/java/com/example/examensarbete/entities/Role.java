@@ -10,17 +10,15 @@ import java.io.Serializable;
 @Getter
 @Setter
 @Entity
-@Table(name = "INSTRUCTION")
-public class Instruction implements Serializable {
+@Table(name = "ROLE")
+public class Role implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id")
-    private Recipe recipe;
-
     @NotEmpty
-    @Column(name = "description")
-    private String description;
+    @Column(name = "role_name")
+    private String name;
+
 }

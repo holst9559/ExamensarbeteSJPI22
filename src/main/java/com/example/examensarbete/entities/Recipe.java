@@ -18,11 +18,10 @@ import java.util.Set;
 @Entity
 @Table(name = "RECIPE")
 public class Recipe implements Serializable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
-    private Integer recipeId;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
