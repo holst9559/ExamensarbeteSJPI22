@@ -19,7 +19,9 @@ public class RecipeIngredient implements Serializable {
     private Long id;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipe_id")
+    @JoinTable(name = "recipe_ingredient_usage",
+            joinColumns = @JoinColumn(name = "recipe_ingredient_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipe_id"))
     private Set<Recipe> recipe;
 
     @ManyToOne(fetch = FetchType.LAZY)
