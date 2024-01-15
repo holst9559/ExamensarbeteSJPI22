@@ -17,6 +17,7 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
+    /*
     @GetMapping
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();
@@ -58,4 +59,6 @@ public class RecipeController {
         return "Recipe with id: " + id + " was deleted.";
     }
 
+
+     */
 }

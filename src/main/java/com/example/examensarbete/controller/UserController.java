@@ -3,7 +3,6 @@ package com.example.examensarbete.controller;
 import com.example.examensarbete.dto.UserDto;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.entities.User;
-import lombok.Getter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +15,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    /*
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id){
         return userService.getUserById(id);
@@ -36,5 +36,7 @@ public class UserController {
         userService.deleteUser(id);
         return "User with id: " + " was deleted.";
     }
+
+     */
 
 }
