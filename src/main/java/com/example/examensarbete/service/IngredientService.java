@@ -61,7 +61,7 @@ public class IngredientService {
 
             return ingredientRepository.save(ingredientToUpdate);
         } else {
-            throw new RuntimeException("Location with the id: " + id + " was not found");
+            throw new RuntimeException("Ingredient with the id: " + id + " was not found");
         }
     }
 
