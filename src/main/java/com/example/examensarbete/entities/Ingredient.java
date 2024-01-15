@@ -17,7 +17,6 @@ import java.util.Objects;
 @Table(name = "INGREDIENT")
 public class Ingredient implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ingredient_id")
     private Long id;
 
@@ -25,7 +24,8 @@ public class Ingredient implements Serializable {
     @Column(name = "ingredient_name")
     private String name;
 
-    public Ingredient(String name) {
+    public Ingredient(Long id, String name) {
+        this.id = id;
         this.name = name;
     }
 
@@ -43,5 +43,13 @@ public class Ingredient implements Serializable {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public String toString(){
+        return "Ingredient{" +
+                "id" + id +
+                "name'" + name + '\'' +
+                '}';
     }
 }

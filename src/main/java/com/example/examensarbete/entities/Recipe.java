@@ -54,6 +54,10 @@ public class Recipe implements Serializable {
     @Column(name = "servings")
     private Integer servings;
 
+    @NotNull
+    @Column(name = "visible")
+    private Boolean visible;
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "recipe")
     private Set<Instruction> instructions = new HashSet();
 
