@@ -3,6 +3,8 @@ package com.example.examensarbete.controller;
 import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.service.IngredientService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +37,15 @@ public class IngredientController {
     public Ingredient getIngredientByName(@PathVariable String name){
         return ingredientService.getIngredientByName(name);
     }
-    /*
+
 
     @PostMapping
-    public String addIngredient(@RequestBody @Validated IngredientDto ingredientDto){
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addIngredient(@RequestBody @Validated IngredientDto ingredientDto){
         ingredientService.addIngredient(ingredientDto);
-        return "Ingredient: " + ingredientDto + " was added to database.";
     }
+
+    /*
 
     @PatchMapping("/{id}")
     public Ingredient editIngredient(@PathVariable int id, @RequestBody @Validated IngredientDto ingredient){
