@@ -28,9 +28,15 @@ public class IngredientService {
         return ingredientRepository.findAll();
     }
 
-    public Ingredient getIngredientById(Integer id){
-        return ingredientRepository.findById(id).orElseThrow(RuntimeException::new);
+    public Ingredient getIngredientById(Long id){
+        return ingredientRepository.findById(id);
     }
+
+    public Ingredient getIngredientByName(String name){
+        return ingredientRepository.findByName(name);
+    }
+
+
 
 
 

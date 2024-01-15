@@ -27,14 +27,15 @@ public class IngredientController {
 
 
     @GetMapping("/{id}")
-    public Ingredient getIngredientById(@PathVariable int id){
+    public Ingredient getIngredientById(@PathVariable Long id){
         return ingredientService.getIngredientById(id);
     }
-/*
+
     @GetMapping("/{name}")
     public Ingredient getIngredientByName(@PathVariable String name){
-        return ingredientService.getIngredientsByName(name);
+        return ingredientService.getIngredientByName(name);
     }
+    /*
 
     @PostMapping
     public String addIngredient(@RequestBody @Validated IngredientDto ingredientDto){
