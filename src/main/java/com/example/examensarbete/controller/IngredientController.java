@@ -35,6 +35,12 @@ public class IngredientController {
         return ingredientService.getIngredientsByName(name);
     }
 
+    @PostMapping
+    public String addIngredient(@RequestBody @Validated IngredientDto ingredientDto){
+        ingredientService.addIngredient(ingredientDto);
+        return "Ingredient: " + ingredientDto + " was added to database.";
+    }
+
     @PatchMapping("/{id}")
     public Ingredient editIngredient(@PathVariable int id, @RequestBody @Validated IngredientDto ingredient){
         return ingredientService.editIngredient(id, ingredient);
@@ -46,9 +52,7 @@ public class IngredientController {
         return "Ingredient with id: " + id + " was deleted.";
     }
 
-
      */
-
 
     @GetMapping("/new")
     public Ingredient[] fetchNewIngredient(@RequestParam String ingredient) {
