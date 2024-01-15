@@ -24,13 +24,13 @@ public class IngredientController {
     public List<Ingredient> getAllIngredients(){
         return ingredientService.getAllIngredients();
     }
-    /*
+
 
     @GetMapping("/{id}")
     public Ingredient getIngredientById(@PathVariable int id){
         return ingredientService.getIngredientById(id);
     }
-
+/*
     @GetMapping("/{name}")
     public Ingredient getIngredientByName(@PathVariable String name){
         return ingredientService.getIngredientsByName(name);

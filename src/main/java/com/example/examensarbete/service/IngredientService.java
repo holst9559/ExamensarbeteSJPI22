@@ -28,6 +28,12 @@ public class IngredientService {
         return ingredientRepository.findAll();
     }
 
+    public Ingredient getIngredientById(Integer id){
+        return ingredientRepository.findById(id).orElseThrow(RuntimeException::new);
+    }
+
+
+
 
     public Ingredient[] fetchNewIngredient(String ingredient){
         IngredientResponse response = webClient.get()
