@@ -7,8 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
+import java.net.URI;
 import java.util.*;
 
 @RestController
@@ -16,41 +18,42 @@ import java.util.*;
 public class IngredientController {
     private final IngredientService ingredientService;
 
-    public IngredientController(IngredientService ingredientService){
+    public IngredientController(IngredientService ingredientService) {
         this.ingredientService = ingredientService;
     }
 
 
-
     @GetMapping
-    public List<Ingredient> getAllIngredients(){
+    public List<Ingredient> getAllIngredients() {
         return ingredientService.getAllIngredients();
     }
 
 
     @GetMapping("/{id}")
-    public Ingredient getIngredientById(@PathVariable Long id){
+    public Ingredient getIngredientById(@PathVariable Long id) {
         return ingredientService.getIngredientById(id);
     }
 
     @GetMapping("/{name}")
-    public Ingredient getIngredientByName(@PathVariable String name){
+    public Ingredient getIngredientByName(@PathVariable String name) {
         return ingredientService.getIngredientByName(name);
     }
 
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void addIngredient(@RequestBody @Validated IngredientDto ingredientDto){
-        ingredientService.addIngredient(ingredientDto);
-    }
+    public ResponseEntity<Ingredient> addIngredient(@RequestBody @Validated IngredientDto ingredientDto) {
+        var created = ingredientService.addIngredient(ingredientDto);
 
-    /*
+        URI locationURI = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(created.getId()).toUri();
+
+        return ResponseEntity.created(locationURI).body(created);
+    }
 
     @PatchMapping("/{id}")
-    public Ingredient editIngredient(@PathVariable int id, @RequestBody @Validated IngredientDto ingredient){
-        return ingredientService.editIngredient(id, ingredient);
+    public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
+        return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
+    /*
 
     @DeleteMapping("/{id}")
     public String deleteIngredient(@PathVariable int id){

@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -40,15 +41,30 @@ public class IngredientService {
     }
 
     @Transactional
-    public void addIngredient(@Validated IngredientDto ingredientDto) {
+    public Ingredient addIngredient(@Validated IngredientDto ingredientDto) {
         var ingredientCheck = ingredientRepository.findByName(ingredientDto.name());
-        if(ingredientCheck.isEmpty()){
+        if (ingredientCheck.isEmpty()) {
             Ingredient ingredient = new Ingredient();
             ingredient.setId(ingredientDto.id());
             ingredient.setName(ingredientDto.name());
-            ingredientRepository.save(ingredient);
+            return ingredientRepository.save(ingredient);
         }
         throw new IllegalArgumentException("Ingredient with the name :" + ingredientDto.name() + " already exist.");
+    }
+
+    @Transactional
+    public Ingredient editIngredient(Long id, @Validated IngredientDto ingredientDto) {
+        Optional<Ingredient> ingredientData = ingredientRepository.findById(id);
+
+        if (ingredientData.isPresent()) {
+            Ingredient ingredientToUpdate = ingredientData.get();
+            ingredientToUpdate.setId(ingredientDto.id());
+            ingredientToUpdate.setName(ingredientDto.name());
+
+            return ingredientRepository.save(ingredientToUpdate);
+        } else {
+            throw new RuntimeException("Location with the id: " + id + " was not found");
+        }
     }
 
 
