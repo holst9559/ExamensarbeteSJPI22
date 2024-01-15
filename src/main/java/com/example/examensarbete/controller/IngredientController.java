@@ -55,7 +55,7 @@ public class IngredientController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteIngredient(@PathVariable Long id){
+    public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
         ingredientService.deleteIngredient(id);
         return ResponseEntity.noContent().build();
     }

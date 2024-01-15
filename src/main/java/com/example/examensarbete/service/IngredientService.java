@@ -68,7 +68,7 @@ public class IngredientService {
     }
 
     @Transactional
-    public void deleteIngredient(Long id){
+    public void deleteIngredient(Long id) {
         var ingredientToDelete = ingredientRepository.findById(id);
         if (ingredientToDelete.isEmpty()) {
             throw new RuntimeException("Ingredient with the ID: " + id + " was not found.");
