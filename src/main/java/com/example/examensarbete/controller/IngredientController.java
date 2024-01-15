@@ -18,12 +18,13 @@ public class IngredientController {
         this.ingredientService = ingredientService;
     }
 
-    /*
+
 
     @GetMapping
     public List<Ingredient> getAllIngredients(){
         return ingredientService.getAllIngredients();
     }
+    /*
 
     @GetMapping("/{id}")
     public Ingredient getIngredientById(@PathVariable int id){
