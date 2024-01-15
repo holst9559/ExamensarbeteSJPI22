@@ -53,15 +53,12 @@ public class IngredientController {
     public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
         return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
-    /*
 
     @DeleteMapping("/{id}")
-    public String deleteIngredient(@PathVariable int id){
+    public ResponseEntity<?> deleteIngredient(@PathVariable Long id){
         ingredientService.deleteIngredient(id);
-        return "Ingredient with id: " + id + " was deleted.";
+        return ResponseEntity.noContent().build();
     }
-
-     */
 
     @GetMapping("/new")
     public Ingredient[] fetchNewIngredient(@RequestParam String ingredient) {

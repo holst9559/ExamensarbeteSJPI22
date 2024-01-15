@@ -67,6 +67,14 @@ public class IngredientService {
         }
     }
 
+    @Transactional
+    public void deleteIngredient(Long id){
+        var ingredientToDelete = ingredientRepository.findById(id);
+        if (ingredientToDelete.isEmpty()) {
+            throw new RuntimeException("Ingredient with the ID: " + id + " was not found.");
+        }
+        ingredientRepository.deleteById(id);
+    }
 
     public Ingredient[] fetchNewIngredient(String ingredient) {
         IngredientResponse response = webClient.get().uri("/food/ingredients/search?query=" + ingredient).header("X-API-KEY", apiKey).retrieve().bodyToMono(IngredientResponse.class).block();
