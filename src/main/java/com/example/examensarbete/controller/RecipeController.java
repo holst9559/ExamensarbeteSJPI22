@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.service.RecipeService;
@@ -41,12 +42,12 @@ public class RecipeController {
     public List<Recipe> getRecipesByUserId(@RequestParam Long userId){
         return recipeService.getRecipesByUserId(userId);
     }
-    /*
 
     @PostMapping
-    public Recipe addRecipe(@RequestBody @Validated RecipeDto recipe){
+    public Recipe addRecipe(@RequestBody @Validated CreateRecipeDto recipe){
         return recipeService.addRecipe(recipe);
     }
+    /*
 
     @PatchMapping("/{id}")
     public Recipe editRecipe(@PathVariable int id,@RequestBody @Validated RecipeDto recipe){

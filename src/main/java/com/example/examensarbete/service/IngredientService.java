@@ -47,7 +47,7 @@ public class IngredientService {
             ingredient.setName(ingredientDto.name());
             return ingredientRepository.save(ingredient);
         }
-        throw new IllegalArgumentException("Ingredient with the name :" + ingredientDto.name() + " already exist.");
+        throw new IllegalArgumentException("Ingredient with the name : " + ingredientDto.name() + " already exist.");
     }
 
     @Transactional

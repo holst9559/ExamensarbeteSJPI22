@@ -1,22 +1,28 @@
 package com.example.examensarbete.service;
 
+import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.RecipeIngredient;
+import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.RecipeRepository;
+import com.example.examensarbete.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
+    private final UserRepository userRepository;
 
-    public RecipeService(RecipeRepository recipeRepository){
+    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository){
         this.recipeRepository = recipeRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Recipe> getAllRecipes(){
@@ -46,10 +52,39 @@ public class RecipeService {
         return recipeRepository.findByUserId(userId);
     }
 
+    @Transactional
+    public Recipe addRecipe(@Validated CreateRecipeDto createRecipeDto){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); //Fix this once OAuth2 is implemented
+        String email = auth.getName();
+
+        User user = userRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+        var recipeCheck = recipeRepository.findByTitle(createRecipeDto.title());
+        if(recipeCheck.isEmpty()){
+            Recipe recipe = createRecipe(createRecipeDto, user);
+            return recipeRepository.save(recipe);
+        }
+        throw new IllegalArgumentException("Recipe with the title: " + createRecipeDto.title() + " already exist.");
 
 
+    }
 
-
+    private static Recipe createRecipe(CreateRecipeDto createRecipeDto, User user) {
+        Recipe recipe = new Recipe();
+        recipe.setUser(user);
+        recipe.setTitle(createRecipeDto.title());
+        recipe.setDish(createRecipeDto.dish());
+        recipe.setCategory(createRecipeDto.category());
+        recipe.setDescription(createRecipeDto.description());
+        recipe.setPrepTime(createRecipeDto.prepTime());
+        recipe.setCookTime(createRecipeDto.cookTime());
+        recipe.setServings(createRecipeDto.servings());
+        recipe.setVisible(createRecipeDto.visible());
+        recipe.setInstructions(createRecipeDto.instructions());
+        recipe.setRecipeIngredients(createRecipeDto.recipeIngredients());
+        recipe.setImgUrl(createRecipeDto.imgUrl());
+        recipe.setDiet(createRecipeDto.diet());
+        return recipe;
+    }
 
 
 }
