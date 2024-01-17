@@ -77,11 +77,19 @@ public class RecipeService {
 
             return recipeRepository.save(recipeToUpdate);
         }else {
-            throw new RuntimeException("Ingredient with the id: " + id + " was not found");
+            throw new RuntimeException("Recipe with the id: " + id + " was not found");
         }
-
     }
 
+    @Transactional
+    public void deleteRecipe(Long id){
+        var recipeCheck = recipeRepository.findById(id);
+
+        if(recipeCheck.isEmpty()){
+            throw new RuntimeException("Recipe with the id: " + id + " was not found");
+        }
+        recipeRepository.deleteById(id);
+    }
 
     private static Recipe createRecipe(CreateRecipeDto createRecipeDto, User user) {
         Recipe recipe = new Recipe();

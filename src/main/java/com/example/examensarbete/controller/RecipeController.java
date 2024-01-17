@@ -55,19 +55,15 @@ public class RecipeController {
         return ResponseEntity.created(locationURI).body(created);
     }
 
-
     @PatchMapping("/{id}")
     public ResponseEntity<Recipe> editRecipe(@PathVariable Long id,@RequestBody @Validated RecipeDto recipeDto){
         return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
     }
-    /*
 
     @DeleteMapping("/{id}")
-    public String deleteRecipe(@PathVariable int id){
+    public ResponseEntity<?> deleteRecipe(@PathVariable Long id){
         recipeService.deleteRecipe(id);
-        return "Recipe with id: " + id + " was deleted.";
+        return ResponseEntity.noContent().build();
     }
 
-
-     */
 }
