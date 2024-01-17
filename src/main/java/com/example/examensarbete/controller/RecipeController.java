@@ -32,12 +32,11 @@ public class RecipeController {
         return recipeService.getRecipeByName(name);
     }
 
-    /*
     @GetMapping
-    public List<Recipe> getRecipesWithIngredients(@RequestParam String ingredients){
+    public List<Recipe> getRecipesWithIngredients(@RequestParam List<String> ingredients){
         return recipeService.getRecipesWithIngredients(ingredients);
     }
-
+/*
     @GetMapping
     public List<Recipe> getUserRecipes(@RequestParam int userId){
         return recipeService.getUserRecipes(userId);
