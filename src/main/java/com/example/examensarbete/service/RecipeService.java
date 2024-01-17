@@ -23,6 +23,11 @@ public class RecipeService {
         return recipeRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    public Recipe getRecipeByName(String name){
+        return recipeRepository.findByName(name).orElseThrow(RuntimeException::new);
+    }
+
+
 
 
 
