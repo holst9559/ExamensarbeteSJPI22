@@ -21,9 +21,9 @@ public class RecipeController {
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();
     }
-/*
+
     @GetMapping("/{id}")
-    public Recipe getRecipeById(@PathVariable int id){
+    public Recipe getRecipeById(@PathVariable Long id){
         return recipeService.getRecipeById(id);
     }
 
@@ -32,6 +32,7 @@ public class RecipeController {
         return recipeService.getRecipeByName(name);
     }
 
+    /*
     @GetMapping
     public List<Recipe> getRecipesWithIngredients(@RequestParam String ingredients){
         return recipeService.getRecipesWithIngredients(ingredients);
