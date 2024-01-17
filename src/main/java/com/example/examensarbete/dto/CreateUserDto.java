@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 import javax.management.relation.Role;
 
-public record UserDto(
-        @NotEmpty
-        Role role,
+public record CreateUserDto(
         @NotEmpty
         String firstName,
         @NotEmpty
@@ -16,6 +14,5 @@ public record UserDto(
         String password,
         @NotEmpty
         String email
-
 ) {
 }

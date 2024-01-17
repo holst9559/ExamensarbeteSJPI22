@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+import com.example.examensarbete.dto.CreateUserDto;
 import com.example.examensarbete.dto.UserDto;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.entities.User;
@@ -20,12 +21,12 @@ public class UserController {
     public User getUserById(@PathVariable Long id){
         return userService.getUserById(id);
     }
-
-    /*
+/*
     @PostMapping
-    public User addUser(@RequestBody @Validated UserDto user){
+    public User addUser(@RequestBody @Validated CreateUserDto user){
         return userService.addUser(user);
     }
+
 
     @PatchMapping("/{id}")
     public User editUser(@PathVariable int id, @RequestBody @Validated UserDto user){
