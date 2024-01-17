@@ -17,12 +17,11 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    /*
     @GetMapping
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();
     }
-
+/*
     @GetMapping("/{id}")
     public Recipe getRecipeById(@PathVariable int id){
         return recipeService.getRecipeById(id);
