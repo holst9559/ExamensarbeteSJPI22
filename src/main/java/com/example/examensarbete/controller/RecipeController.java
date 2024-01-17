@@ -27,20 +27,21 @@ public class RecipeController {
         return recipeService.getRecipeById(id);
     }
 
-    @GetMapping("/{name}")
-    public Recipe getRecipeByName(@PathVariable String name){
-        return recipeService.getRecipeByName(name);
+    @GetMapping("/{title}")
+    public Recipe getRecipeByTitle(@PathVariable String title){
+        return recipeService.getRecipeByTitle(title);
     }
 
     @GetMapping
     public List<Recipe> getRecipesWithIngredients(@RequestParam List<String> ingredients){
         return recipeService.getRecipesWithIngredients(ingredients);
     }
-/*
+
     @GetMapping
-    public List<Recipe> getUserRecipes(@RequestParam int userId){
-        return recipeService.getUserRecipes(userId);
+    public List<Recipe> getRecipesByUserId(@RequestParam Long userId){
+        return recipeService.getRecipesByUserId(userId);
     }
+    /*
 
     @PostMapping
     public Recipe addRecipe(@RequestBody @Validated RecipeDto recipe){

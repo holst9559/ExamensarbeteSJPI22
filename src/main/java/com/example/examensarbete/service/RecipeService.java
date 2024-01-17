@@ -27,8 +27,8 @@ public class RecipeService {
         return recipeRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
-    public Recipe getRecipeByName(String name){
-        return recipeRepository.findByName(name).orElseThrow(RuntimeException::new);
+    public Recipe getRecipeByTitle(String title){
+        return recipeRepository.findByTitle(title).orElseThrow(RuntimeException::new);
     }
 
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients){
@@ -41,6 +41,12 @@ public class RecipeService {
                         .allMatch(ingredients::contains))
                 .toList();
     }
+
+    public List<Recipe> getRecipesByUserId(Long userId){
+        return recipeRepository.findByUserId(userId);
+    }
+
+
 
 
 
