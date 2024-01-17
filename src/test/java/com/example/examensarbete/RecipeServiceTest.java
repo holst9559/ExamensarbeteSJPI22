@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.RecipeIngredient;
+import com.example.examensarbete.repository.RecipeIngredientRepository;
 import com.example.examensarbete.repository.RecipeRepository;
 import com.example.examensarbete.service.RecipeService;
 import org.junit.jupiter.api.Test;
@@ -14,15 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 public class RecipeServiceTest {
 
     @Mock
     private RecipeRepository repository;
+
+    @Mock
+    private RecipeIngredientRepository recipeIngredientRepository;
 
     @InjectMocks
     private RecipeService service;
@@ -33,8 +35,13 @@ public class RecipeServiceTest {
         Recipe recipe1 = createRecipe("flour", "egg");
         Recipe recipe2 = createRecipe("flour");
 
+        RecipeIngredient ingredient1 = createRecipeIngredient("flour");
+        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1);
+        when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
+
         // Mocking Repository Behavior
-        when(repository.searchByIngredients(List.of("flour"))).thenReturn(List.of(recipe1, recipe2));
+        when(repository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
+                .thenReturn(List.of(recipe1, recipe2));
 
         // Method Invocation and Assertion
         assertThat(service.getRecipesWithIngredients(List.of("flour"))).containsExactlyInAnyOrder(recipe2);
@@ -46,8 +53,14 @@ public class RecipeServiceTest {
         Recipe recipe1 = createRecipe("flour", "egg");
         Recipe recipe2 = createRecipe("flour");
 
+        RecipeIngredient ingredient1 = createRecipeIngredient("flour");
+        RecipeIngredient ingredient2 = createRecipeIngredient("egg");
+        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2);
+        when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
+
         // Mocking Repository Behavior
-        when(repository.searchByIngredients(List.of("flour", "egg"))).thenReturn(List.of(recipe1, recipe2));
+        when(repository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
+                .thenReturn(List.of(recipe1, recipe2));
 
         // Method Invocation and Assertion
         assertThat(service.getRecipesWithIngredients(List.of("flour", "egg"))).containsExactlyInAnyOrder(recipe2, recipe1);
@@ -59,8 +72,15 @@ public class RecipeServiceTest {
         Recipe recipe1 = createRecipe("flour", "egg");
         Recipe recipe2 = createRecipe("flour");
 
+        RecipeIngredient ingredient1 = createRecipeIngredient("flour");
+        RecipeIngredient ingredient2 = createRecipeIngredient("egg");
+        RecipeIngredient ingredient3 = createRecipeIngredient("cheese");
+        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2);
+        when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
+
         // Mocking Repository Behavior
-        when(repository.searchByIngredients(List.of("flour", "egg", "cheese"))).thenReturn(List.of(recipe1, recipe2));
+        when(repository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
+                .thenReturn(List.of(recipe1, recipe2));
 
         // Method Invocation and Assertion
         assertThat(service.getRecipesWithIngredients(List.of("flour", "egg", "cheese"))).containsExactlyInAnyOrder(recipe2, recipe1);
@@ -85,5 +105,7 @@ public class RecipeServiceTest {
         return recipeIngredient;
     }
 }
+
+
 
 

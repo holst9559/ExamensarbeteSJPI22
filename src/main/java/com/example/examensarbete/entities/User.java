@@ -34,10 +34,6 @@ public class User implements Serializable {
     private String lastName;
 
     @NotEmpty
-    @Column(name = "password")
-    private String password;
-
-    @NotEmpty
     @Column(name = "email")
     private String email;
 
@@ -48,7 +44,6 @@ public class User implements Serializable {
         this.role = role;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.password = password;
         this.email = email;
         this.recipes = recipes;
     }

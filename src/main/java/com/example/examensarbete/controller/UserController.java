@@ -7,6 +7,8 @@ import com.example.examensarbete.entities.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
@@ -21,12 +23,13 @@ public class UserController {
     public User getUserById(@PathVariable Long id){
         return userService.getUserById(id);
     }
-/*
+
     @PostMapping
-    public User addUser(@RequestBody @Validated CreateUserDto user){
-        return userService.addUser(user);
+    public User addUser(@RequestBody @Validated Principal principal){
+        return userService.addUser(principal);
     }
 
+    /*
 
     @PatchMapping("/{id}")
     public User editUser(@PathVariable int id, @RequestBody @Validated UserDto user){
@@ -38,7 +41,6 @@ public class UserController {
         userService.deleteUser(id);
         return "User with id: " + " was deleted.";
     }
-
-     */
+    */
 
 }

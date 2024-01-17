@@ -36,13 +36,13 @@ public class RecipeController {
         return recipeService.getRecipeByTitle(title);
     }
 
-    @GetMapping
-    public List<Recipe> getRecipesWithIngredients(@RequestParam List<String> ingredients){
+    @GetMapping("/search")
+    public List<Recipe> getRecipesWithIngredients(@RequestParam(value = "ingredients") List<String> ingredients){
         return recipeService.getRecipesWithIngredients(ingredients);
     }
 
-    @GetMapping
-    public List<Recipe> getRecipesByUserId(@RequestParam Long userId){
+    @GetMapping("/{userId}")
+    public List<Recipe> getRecipesByUserId(@PathVariable Long userId){
         return recipeService.getRecipesByUserId(userId);
     }
 

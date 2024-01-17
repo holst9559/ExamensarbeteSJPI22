@@ -6,6 +6,7 @@ import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.RecipeIngredient;
 import com.example.examensarbete.entities.User;
+import com.example.examensarbete.repository.RecipeIngredientRepository;
 import com.example.examensarbete.repository.RecipeRepository;
 import com.example.examensarbete.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -14,16 +15,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
+    private final RecipeIngredientRepository recipeIngredientRepository;
 
-    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository){
+    public RecipeService(RecipeRepository recipeRepository,
+                         UserRepository userRepository,
+                         RecipeIngredientRepository recipeIngredientRepository){
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
+        this.recipeIngredientRepository = recipeIngredientRepository;
     }
 
     public List<Recipe> getAllRecipes(){
@@ -39,7 +45,15 @@ public class RecipeService {
     }
 
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients){
-        List<Recipe> matchingRecipes = recipeRepository.searchByIngredients(ingredients);
+        List<RecipeIngredient> filteredIngredients = recipeIngredientRepository.findAll();
+        Set<RecipeIngredient> filteredSet = filteredIngredients.stream()
+                .filter(recipeIngredient -> {
+                    String ingredientName = recipeIngredient.getIngredientName();
+                    return ingredientName != null && ingredients.contains(ingredientName);
+                })
+                .collect(Collectors.toSet());
+
+        List<Recipe> matchingRecipes = recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(filteredSet));
 
         return matchingRecipes.stream()
                 .filter(recipe -> recipe.getRecipeIngredients().stream()

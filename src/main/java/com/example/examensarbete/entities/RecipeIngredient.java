@@ -30,13 +30,23 @@ public class RecipeIngredient implements Serializable {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
+    @Transient
+    public Long getIngredientId() {
+        return (ingredient != null) ? ingredient.getId() : null;
+    }
+
+    @Transient
+    public String getIngredientName() {
+        return (ingredient != null) ? ingredient.getName() : null;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id")
     private Unit unit;
 
     @NotNull
     @Column(name = "amount")
-    private Integer amount;
+    private int amount;
 
     public RecipeIngredient(Set<Recipe> recipe, Ingredient ingredient, Unit unit, Integer amount) {
         this.recipe = recipe;
