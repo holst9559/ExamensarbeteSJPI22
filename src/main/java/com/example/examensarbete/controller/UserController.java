@@ -15,12 +15,13 @@ public class UserController {
         this.userService = userService;
     }
 
-    /*
+
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable int id){
+    public User getUserById(@PathVariable Long id){
         return userService.getUserById(id);
     }
 
+    /*
     @PostMapping
     public User addUser(@RequestBody @Validated UserDto user){
         return userService.addUser(user);
