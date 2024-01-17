@@ -52,10 +52,10 @@ public class IngredientService {
 
     @Transactional
     public Ingredient editIngredient(Long id, @Validated IngredientDto ingredientDto) {
-        Optional<Ingredient> ingredientData = ingredientRepository.findById(id);
+        var ingredientCheck = ingredientRepository.findById(id);
 
-        if (ingredientData.isPresent()) {
-            Ingredient ingredientToUpdate = ingredientData.get();
+        if (ingredientCheck.isPresent()) {
+            Ingredient ingredientToUpdate = ingredientCheck.get();
             ingredientToUpdate.setId(ingredientDto.id());
             ingredientToUpdate.setName(ingredientDto.name());
 

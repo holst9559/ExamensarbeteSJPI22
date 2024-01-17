@@ -1,6 +1,7 @@
 package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.CreateRecipeDto;
+import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.RecipeIngredient;
@@ -65,8 +66,22 @@ public class RecipeService {
         }
         throw new IllegalArgumentException("Recipe with the title: " + createRecipeDto.title() + " already exist.");
 
+    }
+
+    @Transactional
+    public Recipe editRecipe(Long id, @Validated RecipeDto recipeDto){
+        var recipeCheck = recipeRepository.findById(id);
+
+        if(recipeCheck.isPresent()){
+            Recipe recipeToUpdate = updateRecipe(recipeCheck.get(), recipeDto);
+
+            return recipeRepository.save(recipeToUpdate);
+        }else {
+            throw new RuntimeException("Ingredient with the id: " + id + " was not found");
+        }
 
     }
+
 
     private static Recipe createRecipe(CreateRecipeDto createRecipeDto, User user) {
         Recipe recipe = new Recipe();
@@ -83,6 +98,22 @@ public class RecipeService {
         recipe.setRecipeIngredients(createRecipeDto.recipeIngredients());
         recipe.setImgUrl(createRecipeDto.imgUrl());
         recipe.setDiet(createRecipeDto.diet());
+        return recipe;
+    }
+
+    private static Recipe updateRecipe(Recipe recipe, RecipeDto recipeDto) {
+        recipe.setTitle(recipeDto.title());
+        recipe.setDish(recipeDto.dish());
+        recipe.setCategory(recipeDto.category());
+        recipe.setDescription(recipeDto.description());
+        recipe.setPrepTime(recipeDto.prepTime());
+        recipe.setCookTime(recipeDto.cookTime());
+        recipe.setServings(recipeDto.servings());
+        recipe.setVisible(recipeDto.visible());
+        recipe.setInstructions(recipeDto.instructions());
+        recipe.setRecipeIngredients(recipeDto.recipeIngredients());
+        recipe.setImgUrl(recipeDto.imgUrl());
+        recipe.setDiet(recipeDto.diet());
         return recipe;
     }
 

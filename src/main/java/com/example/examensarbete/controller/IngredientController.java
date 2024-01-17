@@ -40,7 +40,6 @@ public class IngredientController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Ingredient> addIngredient(@RequestBody @Validated IngredientDto ingredientDto) {
         var created = ingredientService.addIngredient(ingredientDto);
 

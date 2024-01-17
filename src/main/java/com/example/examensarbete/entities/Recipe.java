@@ -1,5 +1,6 @@
 package com.example.examensarbete.entities;
 
+import com.example.examensarbete.dto.RecipeDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
