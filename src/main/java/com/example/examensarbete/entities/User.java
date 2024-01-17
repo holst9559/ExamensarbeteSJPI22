@@ -37,6 +37,9 @@ public class User implements Serializable {
     @Column(name = "email")
     private String email;
 
+    @Column(name ="picture_url")
+    private String pictureUrl;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Recipe> recipes;
 
