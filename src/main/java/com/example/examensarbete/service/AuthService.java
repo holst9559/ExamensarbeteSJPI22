@@ -73,7 +73,7 @@ public class AuthService {
     }
 
     //FIX THIS
-    public boolean logout(){
+    public boolean performLogout(){
         String accessTokenValue = retrieveAccessToken();
         if(accessTokenValue != null){
             HttpHeaders headers = createAuthHeader();
@@ -117,7 +117,6 @@ public class AuthService {
             OAuth2AuthorizedClient authorizedClient = oAuth2AuthorizedClientService.loadAuthorizedClient(
                     clientRegistrationId, token.getName());
             OAuth2AccessToken accessToken = authorizedClient.getAccessToken();
-
             return accessToken.getTokenValue();
         }
         return null;

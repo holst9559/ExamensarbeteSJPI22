@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+
 import com.example.examensarbete.dto.GoogleUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,11 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.ui.Model;
 import com.example.examensarbete.service.AuthService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -22,25 +22,6 @@ public class AuthController {
 
     public AuthController(AuthService authService){
         this.authService = authService;
-    }
-
-    @GetMapping("/login")
-    public String showLoginPage(){
-        return "auth/index";
-    }
-
-    @GetMapping("/logout")
-    public String signOut(Model model){
-        boolean isSignedOut = authService.logout();
-
-        if(isSignedOut){
-            model.addAttribute("logoutSuccess", true);
-            logger.info("User signed out successfully");
-        }else {
-            model.addAttribute("logoutError", true);
-            logger.error("Logout failed");
-        }
-        return "auth/logout_status";
     }
 
     @GetMapping("/user")
@@ -56,9 +37,5 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/csrf")
-    public CsrfToken csrf(CsrfToken csrfToken){
-        return csrfToken;
-    }
 
 }

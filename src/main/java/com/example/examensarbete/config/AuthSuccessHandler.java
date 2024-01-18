@@ -40,6 +40,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         logger.info("Authentication successful for user: , {}", authentication.getName());
 
         if(authentication.getPrincipal() instanceof OAuth2User auth){
+            System.out.println("AUTH TEST");
             GoogleUser googleUser = authService.getUserData(auth);
             var userCheck = userRepository.findById(googleUser.id());
             if(userCheck.isEmpty()){
@@ -51,7 +52,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
             }
         }
 
-        res.sendRedirect("/users");
+        res.sendRedirect("/");
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+import com.example.examensarbete.config.AuthSuccessHandler;
 import com.example.examensarbete.dto.CreateUserDto;
 import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.dto.UserDto;
@@ -16,7 +17,8 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    public UserController(UserService userService){
+    public UserController(UserService userService,
+                          AuthSuccessHandler authSuccessHandler){
         this.userService = userService;
     }
 
@@ -32,7 +34,6 @@ public class UserController {
 
 
     /*
-
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable int id){
         userService.deleteUser(id);
