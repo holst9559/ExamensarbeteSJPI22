@@ -2,6 +2,7 @@ package com.example.examensarbete.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,20 +19,21 @@ import java.util.Set;
 @Table(name = "USER")
 public class User implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @NotNull
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
 
-    @NotEmpty
     @Column(name = "first_name")
     private String firstName;
 
-    @NotEmpty
     @Column(name = "last_name")
     private String lastName;
+
+    @Column(name = "full_name")
+    private String fullName;
 
     @NotEmpty
     @Column(name = "email")
@@ -43,7 +45,7 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Recipe> recipes;
 
-    public User(Role role, String firstName, String lastName, String password, String email, Set<Recipe> recipes) {
+    public User(Role role, String firstName, String lastName, String email, Set<Recipe> recipes) {
         this.role = role;
         this.firstName = firstName;
         this.lastName = lastName;
