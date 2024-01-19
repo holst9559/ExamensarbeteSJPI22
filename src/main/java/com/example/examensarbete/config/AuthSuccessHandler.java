@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -41,9 +40,6 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         logger.info("Authentication successful for user: , {}", authentication.getName());
         String redirectUrl = null;
         if(authentication.getPrincipal() instanceof DefaultOAuth2User auth){
-            System.out.println("AUTH TEST");
-            DefaultOAuth2User userDetails = (DefaultOAuth2User) authentication.getPrincipal();
-            System.out.println(userDetails);
             GoogleUser googleUser = authService.getUserData(auth);
             var userCheck = userRepository.findByEmail(googleUser.email());
             if(userCheck.isEmpty()){

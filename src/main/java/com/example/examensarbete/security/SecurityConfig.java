@@ -30,7 +30,10 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                  .logout(l -> l
-                         .logoutSuccessUrl("/").permitAll())
+                         .deleteCookies("JSESSIONID")
+                         .invalidateHttpSession(true)
+                         .clearAuthentication(true)
+                         .logoutSuccessUrl("/login").permitAll())
                 .oauth2Login()
                         .defaultSuccessUrl("/user").successHandler(authenticationSuccessHandler);
         return http.build();
