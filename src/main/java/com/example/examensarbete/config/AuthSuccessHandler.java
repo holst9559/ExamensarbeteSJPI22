@@ -10,12 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
 
 @Component
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {
@@ -38,9 +39,11 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res,
                                         Authentication authentication) throws IOException{
         logger.info("Authentication successful for user: , {}", authentication.getName());
-
-        if(authentication.getPrincipal() instanceof OAuth2User auth){
+        String redirectUrl = null;
+        if(authentication.getPrincipal() instanceof DefaultOAuth2User auth){
             System.out.println("AUTH TEST");
+            DefaultOAuth2User userDetails = (DefaultOAuth2User) authentication.getPrincipal();
+            System.out.println(userDetails);
             GoogleUser googleUser = authService.getUserData(auth);
             var userCheck = userRepository.findById(googleUser.id());
             if(userCheck.isEmpty()){
@@ -51,8 +54,8 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
                 userService.updateUser(googleUser);
             }
         }
-
-        res.sendRedirect("/");
+        redirectUrl = "/user";
+        new DefaultRedirectStrategy().sendRedirect(req, res, redirectUrl);
     }
 }
 

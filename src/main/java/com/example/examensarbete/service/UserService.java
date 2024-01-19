@@ -34,8 +34,10 @@ public class UserService {
         if (userCheck.isEmpty()) {
             User user = updateUserMethod(new User(), googleUser);
             userRepository.save(user);
+        }else {
+            throw new IllegalArgumentException("Email is already registered.");
         }
-        throw new IllegalArgumentException("Email is already registered.");
+
     }
 
     @Transactional

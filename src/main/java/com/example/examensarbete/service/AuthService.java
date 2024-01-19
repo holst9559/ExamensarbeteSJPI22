@@ -23,6 +23,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
@@ -134,7 +135,7 @@ public class AuthService {
 
         if (res != null) {
             Cookie[] cookies = req.getCookies();
-            System.out.println(cookies);
+            System.out.println(Arrays.toString(cookies));
 
             if (cookies != null) {
                 for (Cookie cookie : cookies) {

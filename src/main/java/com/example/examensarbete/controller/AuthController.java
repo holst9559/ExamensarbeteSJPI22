@@ -24,6 +24,12 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "auth/index";
+    }
+
+
     @GetMapping("/user")
     public ResponseEntity<Object> getUserData(@AuthenticationPrincipal OAuth2User principal){
         try{
@@ -35,6 +41,21 @@ public class AuthController {
             logger.error("Error retrieving data", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving data");
         }
+    }
+
+    @GetMapping("/auth/logout")
+    public String signOut(Model model) {
+        boolean isSignedOut = authService.performLogout();
+
+        if (isSignedOut) {
+            model.addAttribute("logoutSuccess", true);
+            logger.info("User signed out successfully");
+        } else {
+            model.addAttribute("logoutError", true);
+            logger.error("Couldn't logout user");
+        }
+
+        return "auth/logout_status";
     }
 
 
