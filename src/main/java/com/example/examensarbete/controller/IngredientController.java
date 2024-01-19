@@ -3,7 +3,6 @@ package com.example.examensarbete.controller;
 import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.service.IngredientService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

@@ -1,16 +1,12 @@
 package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.GoogleUser;
-import com.example.examensarbete.entities.Role;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.security.Principal;
 import java.util.List;
 
 @Service
