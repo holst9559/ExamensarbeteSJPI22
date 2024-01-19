@@ -4,6 +4,7 @@ import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -12,6 +13,8 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    @Value("${ADMIN_EMAIL}")
+    private String adminEmail;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -46,15 +49,24 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id, GoogleUser googleUser) {
+    public void checkAndDeleteUser(Long id, GoogleUser googleUser) {
+        checkPermission(googleUser);
         var userCheck = userRepository.findById(id);
-        var adminCheck = userRepository.findByEmail(googleUser.email()).orElseThrow(RuntimeException::new);
-        if (!adminCheck.toString().equals("antonholstpiano@gmail.com")) {
-            throw new IllegalArgumentException("No permission");
-        } else if(userCheck.isPresent()){
+
+        if (userCheck.isPresent()) {
             userRepository.deleteById(id);
-        }else {
+        } else {
             throw new RuntimeException("User with the ID: " + id + " was not found.");
+        }
+    }
+
+    //Replace with annotations once I get ROLES_ to work
+    private void checkPermission(GoogleUser googleUser) {
+        var adminCheck = userRepository.findByEmail(googleUser.email())
+                .orElseThrow(() -> new RuntimeException("Admin user not found"));
+
+        if (!adminCheck.getEmail().equals(adminEmail)) {
+            throw new RuntimeException("No permission to delete user");
         }
     }
 

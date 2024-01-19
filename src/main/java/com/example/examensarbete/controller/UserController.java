@@ -35,11 +35,19 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id, Authentication authentication) {
-        if(authentication.getPrincipal() instanceof DefaultOAuth2User auth){
+        if (authentication.getPrincipal() instanceof DefaultOAuth2User auth) {
             GoogleUser googleUser = authService.getUserData(auth);
-            userService.deleteUser(id, googleUser);
-            return ResponseEntity.noContent().build();
+
+            try {
+                userService.checkAndDeleteUser(id, googleUser);
+                return ResponseEntity.noContent().build();
+            } catch (RuntimeException e) {
+                return ResponseEntity.status(403).body(e.getMessage());
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("Internal Server Error");
+            }
         }
+
         return ResponseEntity.status(403).build();
     }
 

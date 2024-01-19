@@ -25,11 +25,21 @@ public class Instruction implements Serializable {
     private Recipe recipe;
 
     @NotEmpty
+    @Column(name = "step")
+    private String step;
+
+    @NotEmpty
     @Column(name = "description")
     private String description;
 
-    public Instruction(Recipe recipe, String description) {
+    public Instruction(Recipe recipe, String step, String description) {
         this.recipe = recipe;
+        this.step = step;
+        this.description = description;
+    }
+
+    public Instruction(String step, String description) {
+        this.step = step;
         this.description = description;
     }
 

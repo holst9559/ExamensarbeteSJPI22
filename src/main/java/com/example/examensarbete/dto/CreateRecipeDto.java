@@ -23,8 +23,10 @@ public record CreateRecipeDto(
         Integer servings,
         @NotNull
         Boolean visible,
-        Set<Instruction> instructions,
-        Set<RecipeIngredient> recipeIngredients,
+        @NotEmpty
+        Set<InstructionDto> instructions ,
+        @NotEmpty
+        Set<RecipeIngredientDto> recipeIngredients,
         String imgUrl,
         Diet diet
 ) {

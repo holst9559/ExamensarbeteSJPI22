@@ -1,10 +1,16 @@
 package com.example.examensarbete.controller;
 
 import com.example.examensarbete.dto.CreateRecipeDto;
+import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Recipe;
+import com.example.examensarbete.repository.UserRepository;
+import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.RecipeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,9 +22,15 @@ import java.util.List;
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
+    private final AuthService authService;
+    private final UserRepository userRepository;
 
-    public RecipeController(RecipeService recipeService){
+    public RecipeController(RecipeService recipeService,
+                            AuthService authService,
+                            UserRepository userRepository){
         this.recipeService = recipeService;
+        this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     @GetMapping
