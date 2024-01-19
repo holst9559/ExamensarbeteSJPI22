@@ -12,8 +12,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Configuration
 public class SecurityConfig {
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
-    @Value("${google.api.logout.url}")
-    private String googleSignOutUrl;
 
     public SecurityConfig(AuthenticationSuccessHandler authenticationSuccessHandler) {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
@@ -21,21 +19,19 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-         http
+        http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/auth/logout", "api/user", googleSignOutUrl).authenticated()
                         .requestMatchers("/").permitAll()
-                        .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/api/v1/users").authenticated()
                         .anyRequest().authenticated()
                 )
-                 .logout(l -> l
-                         .deleteCookies("JSESSIONID")
-                         .invalidateHttpSession(true)
-                         .clearAuthentication(true)
-                         .logoutSuccessUrl("/login").permitAll())
+                .logout(l -> l
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .logoutSuccessUrl("/login").permitAll())
                 .oauth2Login()
-                        .defaultSuccessUrl("/user").successHandler(authenticationSuccessHandler);
+                .successHandler(authenticationSuccessHandler);
         return http.build();
     }
 }

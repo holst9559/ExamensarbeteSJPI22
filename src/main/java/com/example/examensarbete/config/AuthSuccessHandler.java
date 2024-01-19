@@ -28,7 +28,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     @Autowired
     public AuthSuccessHandler(AuthService authService,
                               UserService userService,
-                              UserRepository userRepository){
+                              UserRepository userRepository) {
         this.authService = authService;
         this.userService = userService;
         this.userRepository = userRepository;
@@ -36,13 +36,13 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res,
-                                        Authentication authentication) throws IOException{
-        logger.info("Authentication successful for user: , {}", authentication.getName());
+                                        Authentication authentication) throws IOException {
         String redirectUrl = null;
-        if(authentication.getPrincipal() instanceof DefaultOAuth2User auth){
+        logger.debug("Authentication successful for user: , {}", authentication.getName());
+        if (authentication.getPrincipal() instanceof DefaultOAuth2User auth) {
             GoogleUser googleUser = authService.getUserData(auth);
             var userCheck = userRepository.findByEmail(googleUser.email());
-            if(userCheck.isEmpty()){
+            if (userCheck.isEmpty()) {
                 logger.info("New user detected, {}", googleUser.fullName());
                 userService.addUser(googleUser);
             } else {
