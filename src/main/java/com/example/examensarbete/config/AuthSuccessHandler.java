@@ -45,7 +45,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
             DefaultOAuth2User userDetails = (DefaultOAuth2User) authentication.getPrincipal();
             System.out.println(userDetails);
             GoogleUser googleUser = authService.getUserData(auth);
-            var userCheck = userRepository.findById(googleUser.id());
+            var userCheck = userRepository.findByEmail(googleUser.email());
             if(userCheck.isEmpty()){
                 logger.info("New user detected, {}", googleUser.fullName());
                 userService.addUser(googleUser);

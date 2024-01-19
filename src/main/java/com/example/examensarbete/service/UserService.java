@@ -30,7 +30,7 @@ public class UserService {
 
     @Transactional
     public void addUser(@Validated GoogleUser googleUser){
-        var userCheck = userRepository.findById(googleUser.id());
+        var userCheck = userRepository.findByEmail(googleUser.email());
         if (userCheck.isEmpty()) {
             User user = updateUserMethod(new User(), googleUser);
             userRepository.save(user);
@@ -42,7 +42,7 @@ public class UserService {
 
     @Transactional
     public void updateUser(@Validated GoogleUser googleUser){
-        var userCheck = userRepository.findById(googleUser.id());
+        var userCheck = userRepository.findByEmail(googleUser.email());
         if(userCheck.isPresent()){
             User userToUpdate = updateUserMethod(userCheck.get(), googleUser);
             userRepository.save(userToUpdate);
@@ -50,7 +50,6 @@ public class UserService {
     }
 
     private User updateUserMethod(User user, GoogleUser googleUser) {
-        user.setId(googleUser.id());
         user.setFirstName(googleUser.givenName());
         user.setLastName(googleUser.familyName());
         user.setFullName(googleUser.fullName());

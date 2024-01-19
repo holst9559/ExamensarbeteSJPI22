@@ -42,7 +42,7 @@ public class RecipeController {
     }
 
     @GetMapping("/{userId}")
-    public List<Recipe> getRecipesByUserId(@PathVariable String userId){
+    public List<Recipe> getRecipesByUserId(@PathVariable Long userId){
         return recipeService.getRecipesByUserId(userId);
     }
 

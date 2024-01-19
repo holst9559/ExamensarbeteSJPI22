@@ -19,8 +19,8 @@ import java.util.Set;
 @Table(name = "USER")
 public class User implements Serializable {
     @Id
-    @NotNull
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")

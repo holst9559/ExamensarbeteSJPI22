@@ -55,11 +55,10 @@ public class AuthService {
         String givenName = getAttribute(attributes, "given_name", String.class);
         String familyName = getAttribute(attributes, "family_name", String.class);
         String fullName = getAttribute(attributes, "name", String.class);
-        String id = getAttribute(attributes, "sub", String.class);
         String email = getAttribute(attributes, "email", String.class);
         String picture = getAttribute(attributes, "picture", String.class);
 
-        return new GoogleUser(id, givenName, familyName, fullName, email, picture);
+        return new GoogleUser(givenName, familyName, fullName, email, picture);
     }
 
     private <T> T getAttribute(Map<String, Object> attributeObj, String name, Class<T> type) {

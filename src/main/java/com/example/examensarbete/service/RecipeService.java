@@ -63,7 +63,7 @@ public class RecipeService {
                 .toList();
     }
 
-    public List<Recipe> getRecipesByUserId(String userId){
+    public List<Recipe> getRecipesByUserId(Long userId){
         return recipeRepository.findByUserId(userId);
     }
 
