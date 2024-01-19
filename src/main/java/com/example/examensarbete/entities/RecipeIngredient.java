@@ -30,6 +30,12 @@ public class RecipeIngredient implements Serializable {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
+    public RecipeIngredient(Ingredient ingredient, Unit unit, int amount) {
+        this.ingredient = ingredient;
+        this.unit = unit;
+        this.amount = amount;
+    }
+
     @Transient
     public Long getIngredientId() {
         return (ingredient != null) ? ingredient.getId() : null;

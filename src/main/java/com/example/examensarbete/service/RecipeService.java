@@ -2,11 +2,9 @@ package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.RecipeDto;
-import com.example.examensarbete.dto.RecipeIngredientDto;
 import com.example.examensarbete.entities.*;
 import com.example.examensarbete.repository.*;
 import com.example.examensarbete.utils.RecipeCreator;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

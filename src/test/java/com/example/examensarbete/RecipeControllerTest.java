@@ -4,83 +4,81 @@ import com.example.examensarbete.controller.RecipeController;
 import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.InstructionDto;
 import com.example.examensarbete.dto.RecipeIngredientDto;
-import com.example.examensarbete.entities.Ingredient;
-import com.example.examensarbete.entities.Instruction;
-import com.example.examensarbete.entities.Recipe;
-import com.example.examensarbete.entities.RecipeIngredient;
-import com.example.examensarbete.repository.UserRepository;
-import com.example.examensarbete.service.AuthService;
+import com.example.examensarbete.entities.*;
 import com.example.examensarbete.service.RecipeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(RecipeController.class)
-public class RecipeControllerTest {
+@AutoConfigureMockMvc
+class RecipeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private RecipeService recipeService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthService authService;
-
-    @MockBean
-    private UserRepository userRepository;
+    @Autowired
+    private RecipeService recipeService; // You may need to mock this if required
 
     @Test
-    public void testAddRecipe() throws Exception {
-        // Arrange
-        CreateRecipeDto recipeDto = new CreateRecipeDto(
+    @WithMockUser(username = "testUser", roles = "USER")
+    public void testAddRecipeEndpoint() throws Exception {
+        // Create a sample CreateRecipeDto
+        CreateRecipeDto createRecipeDto = new CreateRecipeDto(
                 "Chicken Curry",
-                "Main course",
-                "indian",
-                "Delicious chicken curry",
-                20,
-                30,
+                new Dish("Main Course"),
+                new Category("Indian"),
+                "Delicious curry",
+                20,30,
                 4,
                 true,
-                Set.of(new InstructionDto("1", "prep food")
-                        , new InstructionDto("2","Cook food")),
-                Set.of(createRecipeIngredient("Chicken", 200, "gram"),
-                        createRecipeIngredient("Spices", 5,"gram")),
+                Set.of(new InstructionDto("1","prep food"), new InstructionDto("2", "cook food")),
+                Set.of(createRecipeIngredient("Chicken", 200, "gram"), createRecipeIngredient("Spices", 5, "gram")),
                 "https://example.com/chicken-curry.jpg",
-                "Non vegetarian"
+                new Diet("Non vegetarian")
         );
+        // Set properties of createRecipeDto as needed
 
-        Recipe createdRecipe = createRecipe("Chicken", "Spices");
-        when(recipeService.addRecipe(any(CreateRecipeDto.class))).thenReturn();
+        // Mocking the behavior of recipeService.addRecipe method
+        Recipe mockedRecipe = createRecipe("Chicken","Spices"); // Create a mocked recipe as needed
+        // You can use a mocking framework like Mockito to mock behavior
+        when(recipeService.addRecipe(createRecipeDto)).thenReturn(mockedRecipe);
 
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/recipes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(asJsonString(recipeDto)))
+        // Convert the createRecipeDto to JSON
+        String createRecipeDtoJson = objectMapper.writeValueAsString(createRecipeDto);
+
+        // Perform the POST request to the addRecipe endpoint
+        ResultActions resultActions = mockMvc.perform(post("/api/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createRecipeDtoJson));
+
+        // Verify the response
+        resultActions
                 .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.id", notNullValue()))
-                .andExpect((ResultMatcher) jsonPath("$.title", is("Chicken Curry")));
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value(createRecipeDto.title()))
+                .andExpect(jsonPath("$.user.username").value("testUser")); // Assuming there is a username field in the User class
+
+        // Additional verification steps can be added based on your requirements
     }
+
 
     // Utility method to convert object to JSON string
     private static String asJsonString(final Object obj) {
@@ -95,7 +93,7 @@ public class RecipeControllerTest {
     private Recipe createRecipe(String... ingredients) {
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
         for (String ingredient : ingredients) {
-            recipeIngredients.add(createRecipeIngredient(ingredient));
+            recipeIngredients.add(new RecipeIngredient(new Ingredient(1L, ingredient),new Unit("gram"),200));
         }
         Recipe recipe = new Recipe();
         recipe.setRecipeIngredients(recipeIngredients);

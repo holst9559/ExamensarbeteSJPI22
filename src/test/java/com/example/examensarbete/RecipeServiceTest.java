@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RecipeServiceTest {
+class RecipeServiceTest {
 
     @Mock
     private RecipeRepository repository;

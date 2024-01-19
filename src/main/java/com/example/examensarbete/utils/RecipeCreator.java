@@ -7,6 +7,7 @@ import com.example.examensarbete.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,9 +88,14 @@ public class RecipeCreator {
         if (createRecipeDto.recipeIngredients() != null && !createRecipeDto.recipeIngredients().isEmpty()) {
             Set<RecipeIngredient> recipeIngredients = createRecipeDto.recipeIngredients().stream()
                     .map(ingredientDto -> {
-                        var recipeIngredientCheck = recipeIngredientRepository.findByNameUnitAmount(createRecipeDto.recipeIngredients());
+                        var ingredientCheck = ingredientRepository.findByName(ingredientDto.ingredientName()).orElseThrow(RuntimeException::new);
+                        var unitCheck = unitRepository.findByName(ingredientDto.unit()).orElseThrow(RuntimeException::new);
+                        var recipeIngredientCheck = recipeIngredientRepository.findByIngredientAndUnitAndAmount(
+                                ingredientCheck,
+                                unitCheck,
+                                ingredientDto.amount());
                         if (recipeIngredientCheck.isPresent()) {
-                            return recipeIngredientCheck.get();
+                           return recipeIngredientCheck.get();
                         }
                         RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto);
                         recipeIngredientRepository.save(newRecipeIngredient);
