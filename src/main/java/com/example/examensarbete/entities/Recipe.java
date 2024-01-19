@@ -1,6 +1,5 @@
 package com.example.examensarbete.entities;
 
-import com.example.examensarbete.dto.RecipeDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -8,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
@@ -64,15 +64,18 @@ public class Recipe implements Serializable {
     private Boolean visible;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "recipe")
-    private Set<Instruction> instructions = new HashSet();
+    @JsonIgnore
+    private Set<Instruction> instructions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
-    private Set<RecipeIngredient> recipeIngredients = new HashSet();
+    @JsonIgnore
+    private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     @Column(name = "img_url")
     private String imgUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "diet_id")
     private Diet diet;
 

@@ -13,35 +13,48 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    public User getUserById(Long id){
+
+    public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
     @Transactional
-    public void addUser(@Validated GoogleUser googleUser){
+    public void addUser(@Validated GoogleUser googleUser) {
         var userCheck = userRepository.findByEmail(googleUser.email());
         if (userCheck.isEmpty()) {
             User user = updateUserMethod(new User(), googleUser);
             userRepository.save(user);
-        }else {
+        } else {
             throw new IllegalArgumentException("Email is already registered.");
         }
-
     }
 
     @Transactional
-    public void updateUser(@Validated GoogleUser googleUser){
+    public void updateUser(@Validated GoogleUser googleUser) {
         var userCheck = userRepository.findByEmail(googleUser.email());
-        if(userCheck.isPresent()){
+        if (userCheck.isPresent()) {
             User userToUpdate = updateUserMethod(userCheck.get(), googleUser);
             userRepository.save(userToUpdate);
+        }
+    }
+
+    @Transactional
+    public void deleteUser(Long id, GoogleUser googleUser) {
+        var userCheck = userRepository.findById(id);
+        var adminCheck = userRepository.findByEmail(googleUser.email()).orElseThrow(RuntimeException::new);
+        if (!adminCheck.toString().equals("antonholstpiano@gmail.com")) {
+            throw new IllegalArgumentException("No permission");
+        } else if(userCheck.isPresent()){
+            userRepository.deleteById(id);
+        }else {
+            throw new RuntimeException("User with the ID: " + id + " was not found.");
         }
     }
 
@@ -53,8 +66,5 @@ public class UserService {
         user.setPictureUrl(googleUser.picture());
         return user;
     }
-
-
-
 
 }
