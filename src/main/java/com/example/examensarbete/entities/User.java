@@ -1,13 +1,17 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -21,34 +25,29 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private Role role;
-
-    @NotEmpty
     @Column(name = "first_name")
     private String firstName;
 
-    @NotEmpty
     @Column(name = "last_name")
     private String lastName;
 
-    @NotEmpty
-    @Column(name = "password")
-    private String password;
+    @Column(name = "full_name")
+    private String fullName;
 
     @NotEmpty
     @Column(name = "email")
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Recipe> recipes;
+    @Column(name ="picture_url")
+    private String pictureUrl;
 
-    public User(Role role, String firstName, String lastName, String password, String email, Set<Recipe> recipes) {
-        this.role = role;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<Recipe> recipes = new HashSet<>();
+
+    public User(String firstName, String lastName, String email, Set<Recipe> recipes) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.password = password;
         this.email = email;
         this.recipes = recipes;
     }

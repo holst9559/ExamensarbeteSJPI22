@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
@@ -24,6 +25,10 @@ public class Recipe implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
     private Long id;
+
+    @NotEmpty
+    @Column(name = "recipe_title")
+    private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -59,15 +64,18 @@ public class Recipe implements Serializable {
     private Boolean visible;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "recipe")
-    private Set<Instruction> instructions = new HashSet();
+    @JsonIgnore
+    private Set<Instruction> instructions = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
-    private Set<RecipeIngredient> recipeIngredients = new HashSet();
+    @JsonIgnore
+    private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     @Column(name = "img_url")
     private String imgUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "diet_id")
     private Diet diet;
 
@@ -99,6 +107,21 @@ public class Recipe implements Serializable {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "id = " + id + ", " +
+                "title = " + title + ", " +
+                "description = " + description + ", " +
+                "instruction = " + getInstructions().toString() + "," +
+                "recipeIngredients = " + getRecipeIngredients().toString() + "," +
+                "prepTime = " + prepTime + ", " +
+                "cookTime = " + cookTime + ", " +
+                "servings = " + servings + ", " +
+                "visible = " + visible + ", " +
+                "imgUrl = " + imgUrl + ")";
     }
 
     private int calculateTotalTime(int prepTime, int cookTime){

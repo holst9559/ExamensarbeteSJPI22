@@ -30,20 +30,18 @@ public class RecipeIngredient implements Serializable {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
+    @Transient
+    public String getIngredientName() {
+        return (ingredient != null) ? ingredient.getName() : null;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id")
     private Unit unit;
 
     @NotNull
     @Column(name = "amount")
-    private Integer amount;
-
-    public RecipeIngredient(Set<Recipe> recipe, Ingredient ingredient, Unit unit, Integer amount) {
-        this.recipe = recipe;
-        this.ingredient = ingredient;
-        this.unit = unit;
-        this.amount = amount;
-    }
+    private Double amount;
 
     @Override
     public final boolean equals(Object o) {
@@ -59,5 +57,13 @@ public class RecipeIngredient implements Serializable {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "ingredient = " + getIngredientName() + "," +
+                "id = " + id + ", " +
+                "amount = " + amount + ")";
     }
 }

@@ -6,13 +6,9 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Set;
 
-public record RecipeDto(
-        @NotEmpty
-        Long id,
+public record CreateRecipeDto(
         @NotEmpty
         String title,
-        @NotEmpty
-        User user,
         @NotEmpty
         Dish dish,
         @NotEmpty
@@ -27,8 +23,10 @@ public record RecipeDto(
         Integer servings,
         @NotNull
         Boolean visible,
-        Set<Instruction> instructions,
-        Set<RecipeIngredient> recipeIngredients,
+        @NotEmpty
+        Set<InstructionDto> instructions ,
+        @NotEmpty
+        Set<RecipeIngredientDto> recipeIngredients,
         String imgUrl,
         Diet diet
 ) {
