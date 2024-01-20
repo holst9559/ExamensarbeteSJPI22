@@ -30,17 +30,6 @@ public class RecipeIngredient implements Serializable {
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
-    public RecipeIngredient(Ingredient ingredient, Unit unit, int amount) {
-        this.ingredient = ingredient;
-        this.unit = unit;
-        this.amount = amount;
-    }
-
-    @Transient
-    public Long getIngredientId() {
-        return (ingredient != null) ? ingredient.getId() : null;
-    }
-
     @Transient
     public String getIngredientName() {
         return (ingredient != null) ? ingredient.getName() : null;
@@ -53,13 +42,6 @@ public class RecipeIngredient implements Serializable {
     @NotNull
     @Column(name = "amount")
     private int amount;
-
-    public RecipeIngredient(Set<Recipe> recipe, Ingredient ingredient, Unit unit, Integer amount) {
-        this.recipe = recipe;
-        this.ingredient = ingredient;
-        this.unit = unit;
-        this.amount = amount;
-    }
 
     @Override
     public final boolean equals(Object o) {
