@@ -67,7 +67,7 @@ class RecipeServiceTest {
     }
 
     @Test
-    void getRecipesWithAdditionalIngredient() {
+    void getRecipesWithIngredients() {
         // Setup
         Recipe recipe1 = createRecipe("flour", "egg");
         Recipe recipe2 = createRecipe("flour");
