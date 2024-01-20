@@ -22,15 +22,9 @@ import java.util.List;
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
-    private final AuthService authService;
-    private final UserRepository userRepository;
 
-    public RecipeController(RecipeService recipeService,
-                            AuthService authService,
-                            UserRepository userRepository){
+    public RecipeController(RecipeService recipeService){
         this.recipeService = recipeService;
-        this.userRepository = userRepository;
-        this.authService = authService;
     }
 
     @GetMapping
