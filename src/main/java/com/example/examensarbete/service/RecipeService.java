@@ -20,15 +20,18 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeCreator recipeCreator;
+    private final IngredientRepository ingredientRepository;
 
     public RecipeService(RecipeRepository recipeRepository,
                          UserRepository userRepository,
                          RecipeIngredientRepository recipeIngredientRepository,
-                         RecipeCreator recipeCreator) {
+                         RecipeCreator recipeCreator,
+                         IngredientRepository ingredientRepository) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.recipeIngredientRepository = recipeIngredientRepository;
         this.recipeCreator = recipeCreator;
+        this.ingredientRepository = ingredientRepository;
     }
 
     private static Recipe updateRecipe(Recipe recipe, RecipeDto recipeDto) {

@@ -58,4 +58,12 @@ public class RecipeIngredient implements Serializable {
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "ingredient = " + getIngredientName() + "," +
+                "id = " + id + ", " +
+                "amount = " + amount + ")";
+    }
 }

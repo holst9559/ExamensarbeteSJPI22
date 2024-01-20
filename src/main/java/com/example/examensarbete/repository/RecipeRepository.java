@@ -13,6 +13,6 @@ import java.util.Set;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Optional<Recipe> findByTitle(String title);
-    List<Recipe> searchByRecipeIngredientsIn(Collection<Set<RecipeIngredient>> ingredients);
+    List<Recipe> searchByRecipeIngredientsIn(Collection<Set<RecipeIngredient>> recipeIngredients);
     List<Recipe> findByUserId(Long userId);
 }

@@ -109,6 +109,21 @@ public class Recipe implements Serializable {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "id = " + id + ", " +
+                "title = " + title + ", " +
+                "description = " + description + ", " +
+                "instruction = " + getInstructions().toString() + "," +
+                "recipeIngredients = " + getRecipeIngredients().toString() + "," +
+                "prepTime = " + prepTime + ", " +
+                "cookTime = " + cookTime + ", " +
+                "servings = " + servings + ", " +
+                "visible = " + visible + ", " +
+                "imgUrl = " + imgUrl + ")";
+    }
+
     private int calculateTotalTime(int prepTime, int cookTime){
         return prepTime + cookTime;
     }
