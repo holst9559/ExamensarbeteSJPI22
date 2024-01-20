@@ -196,9 +196,9 @@ class RecipeServiceTest {
 
         // Method Invocation and Assertion
         Recipe editedRecipe = recipeService.editRecipe(recipeId, recipeDto);
-        assertNotNull(editedRecipe);
-        assertEquals(recipeDto.title(), editedRecipe.getTitle());
-        assertEquals(10,editedRecipe.getServings());
+        assertNotNull(editedRecipe, "Edited recipe should not be null");
+        assertEquals(recipeDto.title(), editedRecipe.getTitle(), "Title should be updated");
+        assertEquals(10,editedRecipe.getServings(), "Servings should be updated");
     }
 
     @Test

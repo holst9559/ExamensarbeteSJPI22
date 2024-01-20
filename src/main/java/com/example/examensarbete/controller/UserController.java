@@ -39,8 +39,12 @@ public class UserController {
             GoogleUser googleUser = authService.getUserData(auth);
 
             try {
-                userService.checkAndDeleteUser(id, googleUser);
-                return ResponseEntity.noContent().build();
+                if(userService.checkPermission(googleUser)){
+                    userService.deleteUser(id);
+                    return ResponseEntity.noContent().build();
+                }
+                return ResponseEntity.status(403).body("No permission");
+
             } catch (RuntimeException e) {
                 return ResponseEntity.status(403).body(e.getMessage());
             } catch (Exception e) {

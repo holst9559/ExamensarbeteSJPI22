@@ -49,10 +49,8 @@ public class UserService {
     }
 
     @Transactional
-    public void checkAndDeleteUser(Long id, GoogleUser googleUser) {
-        checkPermission(googleUser);
+    public void deleteUser(Long id) {
         var userCheck = userRepository.findById(id);
-
         if (userCheck.isPresent()) {
             userRepository.deleteById(id);
         } else {
@@ -61,13 +59,11 @@ public class UserService {
     }
 
     //Replace with annotations once I get ROLES_ to work
-    private void checkPermission(GoogleUser googleUser) {
+    public boolean checkPermission(GoogleUser googleUser) {
         var adminCheck = userRepository.findByEmail(googleUser.email())
                 .orElseThrow(() -> new RuntimeException("Admin user not found"));
 
-        if (!adminCheck.getEmail().equals(adminEmail)) {
-            throw new RuntimeException("No permission to delete user");
-        }
+        return adminCheck.getEmail().equals(adminEmail);
     }
 
     private User updateUserMethod(User user, GoogleUser googleUser) {
