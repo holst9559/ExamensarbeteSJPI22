@@ -104,6 +104,34 @@ class RecipeServiceTest {
         recipeIngredient.setIngredient(ingredient);
         return recipeIngredient;
     }
+
+    @Test
+    void getAllRecipes() {
+    }
+
+    @Test
+    void getRecipeById() {
+    }
+
+    @Test
+    void getRecipeByTitle() {
+    }
+
+    @Test
+    void getRecipesByUserId() {
+    }
+
+    @Test
+    void addRecipe() {
+    }
+
+    @Test
+    void editRecipe() {
+    }
+
+    @Test
+    void deleteRecipe() {
+    }
 }
 
 
