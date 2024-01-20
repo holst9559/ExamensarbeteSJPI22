@@ -9,6 +9,8 @@ public class WebClientConfig {
 
     @Bean
     public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
+        return WebClient.builder().baseUrl("https://api.spoonacular.com")
+                .codecs(configurer -> configurer.defaultCodecs()
+                        .maxInMemorySize(2 * 1024 * 1024));
     }
 }

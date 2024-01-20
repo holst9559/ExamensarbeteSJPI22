@@ -22,7 +22,7 @@ public class IngredientService {
     private String apiKey;
 
     public IngredientService(WebClient.Builder webClientBuilder, IngredientRepository ingredientRepository) {
-        this.webClient = webClientBuilder.baseUrl("https://api.spoonacular.com").codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024)).build();
+        this.webClient = webClientBuilder.build();
         this.ingredientRepository = ingredientRepository;
     }
 
