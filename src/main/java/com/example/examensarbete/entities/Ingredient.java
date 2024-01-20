@@ -52,5 +52,4 @@ public class Ingredient implements Serializable {
                 "name'" + name + '\'' +
                 '}';
     }
-
 }
