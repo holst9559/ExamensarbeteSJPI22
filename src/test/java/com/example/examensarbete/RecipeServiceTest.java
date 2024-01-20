@@ -245,8 +245,8 @@ class RecipeServiceTest {
         instructions.add(createNewInstructionDto("2", "Cook"));
 
         Set<RecipeIngredientDto> recipeIngredients = new HashSet<>();
-        recipeIngredients.add(createRecipeIngredientDto("flour", 200, "gram"));
-        recipeIngredients.add(createRecipeIngredientDto("eggs", 2, "pcs"));
+        recipeIngredients.add(createRecipeIngredientDto("flour", 200.0, "gram"));
+        recipeIngredients.add(createRecipeIngredientDto("eggs", 2.0, "pcs"));
 
         return new CreateRecipeDto("Pancakes",
                 new Dish("Other"),
@@ -269,8 +269,8 @@ class RecipeServiceTest {
         instructions.add(createNewInstruction("2", "Cook"));
 
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
-        recipeIngredients.add(createRecipeIngredient(1L,"flour", 200, "gram"));
-        recipeIngredients.add(createRecipeIngredient(4L,"eggs", 2, "pcs"));
+        recipeIngredients.add(createRecipeIngredient(1L,"flour", 200.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(4L,"eggs", 2.0, "pcs"));
 
         return new RecipeDto(1L,
                 "Pancakes",
@@ -291,7 +291,7 @@ class RecipeServiceTest {
     }
 
 
-    private RecipeIngredient createRecipeIngredient(Long id, String ingredientName, int amount, String unit) {
+    private RecipeIngredient createRecipeIngredient(Long id, String ingredientName, Double amount, String unit) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(ingredientName);
         RecipeIngredient recipeIngredient = new RecipeIngredient();
@@ -317,7 +317,7 @@ class RecipeServiceTest {
         );
     }
 
-    private RecipeIngredientDto createRecipeIngredientDto(String ingredientName, int amount, String unit) {
+    private RecipeIngredientDto createRecipeIngredientDto(String ingredientName, Double amount, String unit) {
         return new RecipeIngredientDto(
                 ingredientName,
                 amount,
@@ -450,16 +450,16 @@ class RecipeServiceTest {
 
     private List<RecipeIngredient> mockRecipeIngredients(){
         List<RecipeIngredient> recipeIngredients = new ArrayList<>();
-        RecipeIngredient ingredient1 = createRecipeIngredient(1L,"flour", 200, "gram");
-        RecipeIngredient ingredient2 = createRecipeIngredient(2L,"flour", 50, "gram");
-        RecipeIngredient ingredient3 = createRecipeIngredient(3L,"flour", 15, "gram");
-        RecipeIngredient ingredient4 = createRecipeIngredient(4L,"eggs", 2, "pcs");
-        RecipeIngredient ingredient5 = createRecipeIngredient(5L,"eggs", 3, "pcs");
-        RecipeIngredient ingredient6 = createRecipeIngredient(6L,"panko", 80, "gram");
-        RecipeIngredient ingredient7 = createRecipeIngredient(7L,"chicken", 400, "gram");
-        RecipeIngredient ingredient8 = createRecipeIngredient(8L,"beef", 200, "gram");
-        RecipeIngredient ingredient9 = createRecipeIngredient(9L,"curry", 20, "gram");
-        RecipeIngredient ingredient10 = createRecipeIngredient(10L,"tofu", 200, "gram");
+        RecipeIngredient ingredient1 = createRecipeIngredient(1L,"flour", 200.0, "gram");
+        RecipeIngredient ingredient2 = createRecipeIngredient(2L,"flour", 50.0, "gram");
+        RecipeIngredient ingredient3 = createRecipeIngredient(3L,"flour", 15.0, "gram");
+        RecipeIngredient ingredient4 = createRecipeIngredient(4L,"eggs", 2.0, "pcs");
+        RecipeIngredient ingredient5 = createRecipeIngredient(5L,"eggs", 3.0, "pcs");
+        RecipeIngredient ingredient6 = createRecipeIngredient(6L,"panko", 80.0, "gram");
+        RecipeIngredient ingredient7 = createRecipeIngredient(7L,"chicken", 400.0, "gram");
+        RecipeIngredient ingredient8 = createRecipeIngredient(8L,"beef", 200.0, "gram");
+        RecipeIngredient ingredient9 = createRecipeIngredient(9L,"curry", 20.0, "gram");
+        RecipeIngredient ingredient10 = createRecipeIngredient(10L,"tofu", 200.0, "gram");
 
         recipeIngredients.add(ingredient1);
         recipeIngredients.add(ingredient2);

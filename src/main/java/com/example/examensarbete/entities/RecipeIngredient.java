@@ -41,7 +41,7 @@ public class RecipeIngredient implements Serializable {
 
     @NotNull
     @Column(name = "amount")
-    private int amount;
+    private Double amount;
 
     @Override
     public final boolean equals(Object o) {

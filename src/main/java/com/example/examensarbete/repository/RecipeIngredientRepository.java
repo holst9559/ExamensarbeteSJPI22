@@ -13,5 +13,5 @@ import java.util.Set;
 
 @Repository
 public interface RecipeIngredientRepository extends JpaRepository<RecipeIngredient, Long> {
-    Optional<RecipeIngredient> findByIngredientAndUnitAndAmount(Ingredient ingredient, Unit unit, Integer amount);
+    Optional<RecipeIngredient> findByIngredientAndUnitAndAmount(Ingredient ingredient, Unit unit, Double amount);
 }

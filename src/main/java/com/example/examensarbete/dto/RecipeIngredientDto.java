@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 public record RecipeIngredientDto(
         String ingredientName,
-        int amount,
+        Double amount,
         String unit
         ) {
 }
