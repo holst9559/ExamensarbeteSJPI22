@@ -1,26 +1,21 @@
 package com.example.examensarbete.controller;
 
-import com.example.examensarbete.dto.GoogleUser;
-import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.entities.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@PreAuthorize("hasAuthority('OIDC_ADMIN')")
 @RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;
-    private final AuthService authService;
 
-    public UserController(UserService userService,
-                          AuthService authService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.authService = authService;
     }
 
     @GetMapping
@@ -34,24 +29,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id, Authentication authentication) {
-        if (authentication.getPrincipal() instanceof DefaultOAuth2User auth) {
-            GoogleUser googleUser = authService.getUserData(auth);
-
-            try {
-                if(userService.checkPermission(googleUser)){
-                    userService.deleteUser(id);
-                    return ResponseEntity.noContent().build();
-                }
-                return ResponseEntity.status(403).body("No permission");
-
-            } catch (RuntimeException e) {
-                return ResponseEntity.status(403).body(e.getMessage());
-            } catch (Exception e) {
-                return ResponseEntity.status(500).body("Internal Server Error");
-            }
-        }
-
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
         return ResponseEntity.status(403).build();
     }
 
