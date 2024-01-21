@@ -8,6 +8,8 @@ import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.RecipeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -28,6 +30,12 @@ public class RecipeController {
     }
 
     @GetMapping
+    public List<Recipe> getAllPublicRecipes(){
+        return recipeService.getAllPublicRecipes();
+    }
+
+    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @GetMapping("/all")
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();
     }

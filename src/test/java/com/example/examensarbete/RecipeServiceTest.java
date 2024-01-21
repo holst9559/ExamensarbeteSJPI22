@@ -14,6 +14,7 @@ import com.example.examensarbete.repository.RecipeIngredientRepository;
 import com.example.examensarbete.repository.RecipeRepository;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.RecipeService;
+import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,12 +37,13 @@ class RecipeServiceTest {
     private RecipeIngredientRepository recipeIngredientRepository;
     @Mock
     private RecipeCreator recipeCreator;
-
+    @Mock
+    private AuthenticationFacade authenticationFacade;
     @InjectMocks
     private RecipeService recipeService;
 
     @Test
-    void getRecipesWithMultipleIngredients() {
+    void getRecipesWithIngredients_Admin() {
         // Setup
         Recipe recipe1 = mockRecipe(); //Pancakes
         Recipe recipe3 = mockRecipe3(); //Fried Chicken
@@ -53,31 +55,56 @@ class RecipeServiceTest {
         List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2, ingredient3, ingredient4);
         when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
 
+        // Mocking AuthenticationFacade
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+
         // Mocking Repository Behavior
         when(recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
                 .thenReturn(List.of(recipe1, recipe3));
 
         // Method Invocation and Assertion
         assertThat(recipeService.getRecipesWithIngredients(List.of("flour", "eggs", "panko", "chicken", "beef"))).containsExactlyInAnyOrder(recipe1,recipe3);
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, times(1)).searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients)));
+        verify(recipeRepository, never()).findByUserEmail(any());
+        verify(recipeRepository, never()).findByVisibleAndRecipeIngredientsIn(anyBoolean(), any());
     }
 
     @Test
-    void getRecipesWithIngredients() {
+    void getRecipesWithIngredients_UserNotAdmin() {
         // Setup
         Recipe recipe1 = mockRecipe(); //Pancakes
-        Recipe recipe3 = mockRecipe3(); //Fried Chicken
+        Recipe userRecipe1 = mockRecipe3(); //Fried Chicken private
 
-        RecipeIngredient ingredient1 = mockRecipeIngredients().get(2);
-        RecipeIngredient ingredient2 = mockRecipeIngredients().get(4);
-        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2);
+        RecipeIngredient ingredient1 = mockRecipeIngredients().get(0);
+        RecipeIngredient ingredient2 = mockRecipeIngredients().get(3);
+        RecipeIngredient ingredient3 = mockRecipeIngredients().get(5);
+        RecipeIngredient ingredient4 = mockRecipeIngredients().get(6);
+        RecipeIngredient ingredient5 = mockRecipeIngredients().get(8);
+        RecipeIngredient ingredient6 = mockRecipeIngredients().get(9);
+        RecipeIngredient ingredient7 = mockRecipeIngredients().get(2);
+        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6, ingredient7);
+
         when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
 
-        // Mocking Repository Behavior
-        when(recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
-                .thenReturn(List.of(recipe1, recipe3));
+        // Mocking AuthenticationFacade
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getEmail()).thenReturn("john@google.com");
+
+        // Mocking Repository Behavior for non-admin user
+        when(recipeRepository.findByUserEmail("john@google.com")).thenReturn(List.of(userRecipe1));
+        when(recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(mockIngredients))))
+                .thenReturn(List.of(recipe1));
 
         // Method Invocation and Assertion
-        assertThat(recipeService.getRecipesWithIngredients(List.of("flour", "eggs"))).containsExactlyInAnyOrder(recipe1);
+        assertThat(recipeService.getRecipesWithIngredients(List.of("flour", "eggs", "panko", "chicken", "beef", "curry", "tofu")))
+                .containsExactlyInAnyOrder(recipe1, userRecipe1);
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, never()).searchByRecipeIngredientsIn(any());
+        verify(recipeRepository, times(1)).findByUserEmail("john@google.com");
+        verify(recipeRepository, times(1)).findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(mockIngredients)));
     }
 
     @Test
@@ -121,26 +148,57 @@ class RecipeServiceTest {
     }
 
     @Test
-    void getRecipesByUserId_success() {
+    void getRecipesByUserId_Success_AdminRole() {
         // Mocking Repository Behavior
+        Recipe recipe1 = mockRecipe(); //Pancakes
+        User user = newUser(recipe1);
         Long userId = 1L;
-        when(recipeRepository.findByUserId(userId)).thenReturn(List.of(mockRecipe(),mockRecipe2()
-        ));
+
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+        when(authenticationFacade.getEmail()).thenReturn("test@google.com");
+        when(userRepository.findByEmail("test@google.com")).thenReturn(Optional.of(user));
+        when(recipeRepository.findByUserId(userId)).thenReturn(List.of(mockRecipe(), mockRecipe2()));
 
         // Method Invocation and Assertion
         List<Recipe> recipes = recipeService.getRecipesByUserId(userId);
         assertThat(recipes).hasSize(2);
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, times(1)).findByUserId(userId);
+        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyLong());
     }
 
     @Test
-    void getRecipesByUserId_userNotFound() {
+    void getRecipesByUserId_Success_UserMatch() {
         // Mocking Repository Behavior
-        Long userId = 2L;
-        when(recipeRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        Recipe recipe1 = mockRecipe(); //Pancakes
+        User user = newUser2(recipe1);
+        Long userId = 1L;
+
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getEmail()).thenReturn("john@google.com");
+        when(userRepository.findByEmail("john@google.com")).thenReturn(Optional.of(user));
+        when(recipeRepository.findByVisibleAndUserId(true, userId)).thenReturn(List.of(mockRecipe3()));
 
         // Method Invocation and Assertion
         List<Recipe> recipes = recipeService.getRecipesByUserId(userId);
-        assertThat(recipes).isEmpty();
+        assertThat(recipes).hasSize(1);
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, never()).findByUserId(anyLong());
+        verify(recipeRepository, times(1)).findByVisibleAndUserId(true, userId);
+    }
+
+    @Test
+    void getRecipesByUserId_UserNotFound() {
+        // Mocking Repository Behavior
+        when(userRepository.findByEmail("user@example.com")).thenThrow(new RuntimeException("User not found"));
+        // Method Invocation and Assertion
+        assertThrows(RuntimeException.class, () -> userRepository.findByEmail("user@example.com"));
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, never()).findByUserId(anyLong());
+        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyLong());
     }
 
     @Test
@@ -186,19 +244,50 @@ class RecipeServiceTest {
     }
 
     @Test
-    void editRecipe_Successful() {
+    void editRecipe_Successful_AdminRole() {
         // Mocking Repository Behavior
         Long recipeId = 1L;
         RecipeDto recipeDto = RecipeDto();
         Recipe existingRecipe = mockRecipe();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
         when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Method Invocation and Assertion
         Recipe editedRecipe = recipeService.editRecipe(recipeId, recipeDto);
         assertNotNull(editedRecipe, "Edited recipe should not be null");
         assertEquals(recipeDto.title(), editedRecipe.getTitle(), "Title should be updated");
-        assertEquals(10,editedRecipe.getServings(), "Servings should be updated");
+        assertEquals(10, editedRecipe.getServings(), "Servings should be updated");
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, times(1)).findById(recipeId);
+        verify(authenticationFacade, times(1)).getRoles();
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(recipeRepository, times(1)).save(any(Recipe.class));
+    }
+
+    @Test
+    void editRecipe_Successful_UserMatch() {
+        // Mocking Repository Behavior
+        Long recipeId = 3L;
+        RecipeDto recipeDto = RecipeDto2();
+        Recipe existingRecipe = mockRecipe3();
+        when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getEmail()).thenReturn("john@google.com");
+        when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Method Invocation and Assertion
+        Recipe editedRecipe = recipeService.editRecipe(recipeId, recipeDto);
+        assertNotNull(editedRecipe, "Edited recipe should not be null");
+        assertEquals(recipeDto.title(), editedRecipe.getTitle(), "Title should be updated");
+        assertEquals(10, editedRecipe.getServings(), "Servings should be updated");
+
+        // Verify that the repository methods were called as expected
+        verify(recipeRepository, times(1)).findById(recipeId);
+        verify(authenticationFacade, times(1)).getRoles();
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(recipeRepository, times(1)).save(any(Recipe.class));
     }
 
     @Test
@@ -213,12 +302,29 @@ class RecipeServiceTest {
     }
 
     @Test
-    void deleteRecipe_Successful() {
+    void deleteRecipe_Successful_AdminRole() {
         // Mocking Repository Behavior
         Long recipeId = 1L;
         Recipe existingRecipe = mockRecipe();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+        when(authenticationFacade.getEmail()).thenReturn("test@google.com");
 
+        // Method Invocation
+        recipeService.deleteRecipe(recipeId);
+
+        // Verification
+        verify(recipeRepository, times(1)).deleteById(recipeId);
+    }
+
+    @Test
+    void deleteRecipe_Successful_UserMatch() {
+        // Mocking Repository Behavior
+        Long recipeId = 3L;
+        Recipe existingRecipe = mockRecipe3();
+        when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getEmail()).thenReturn("john@google.com");
 
         // Method Invocation
         recipeService.deleteRecipe(recipeId);
@@ -286,6 +392,35 @@ class RecipeServiceTest {
                 recipeIngredients,
                 "https://plus.unsplash.com/premium_photo-1672846027109-e2c91500afef?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 new Diet("VEGETARIAN")
+
+        );
+    }
+
+    private RecipeDto RecipeDto2(){
+        Set<Instruction> instructions = new HashSet<>();
+        instructions.add(createNewInstruction("1", "Prep"));
+        instructions.add(createNewInstruction("2", "Cook"));
+
+        Set<RecipeIngredient> recipeIngredients = new HashSet<>();
+        recipeIngredients.add(createRecipeIngredient(2L,"flour", 50.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(5L,"eggs", 3.0, "pcs"));
+        recipeIngredients.add(createRecipeIngredient(6L,"panko", 80.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(7L,"chicken", 400.0, "gram"));
+
+        return new RecipeDto(3L,
+                "Fried Chicken",
+                newUser(null),
+                new Dish("Main Course"),
+                new Category("Other"),
+                "Crispy chicken",
+                10,
+                20,
+                10,
+                false,
+                instructions,
+                recipeIngredients,
+                "https://plus.unsplash.com/premium_photo-1672846027109-e2c91500afef?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                new Diet("OMNIVORE")
 
         );
     }
@@ -373,10 +508,10 @@ class RecipeServiceTest {
         recipe.setDiet(new Diet("VEGETARIAN"));
         recipe.setImgUrl("https://plus.unsplash.com/premium_photo-1672846027109-e2c91500afef?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
         recipe.setDish(new Dish("Main Course"));
-        recipe.setVisible(true);
+        recipe.setVisible(false);
         recipe.setCookTime(10);
         recipe.setPrepTime(20);
-        recipe.setId(1L);
+        recipe.setId(2L);
         recipe.setDescription("Tasty tofu curry");
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
@@ -410,10 +545,10 @@ class RecipeServiceTest {
         recipe.setDiet(new Diet("OMNIVORE"));
         recipe.setImgUrl("https://plus.unsplash.com/premium_photo-1672846027109-e2c91500afef?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
         recipe.setDish(new Dish("Main Course"));
-        recipe.setVisible(true);
+        recipe.setVisible(false);
         recipe.setCookTime(10);
         recipe.setPrepTime(20);
-        recipe.setId(1L);
+        recipe.setId(3L);
         recipe.setDescription("Crispy chicken");
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
@@ -428,7 +563,7 @@ class RecipeServiceTest {
         recipeIngredients.add(ingredient4);
         recipe.setRecipeIngredients(recipeIngredients);
 
-        recipe.setUser(newUser(recipe));
+        recipe.setUser(newUser2(recipe));
 
         return recipe;
     }
@@ -441,6 +576,19 @@ class RecipeServiceTest {
         user.setFirstName("Anton");
         user.setLastName("Holst");
         user.setFullName("Anton Holst");
+        Set<Recipe> recipeSet = new HashSet<>();
+        recipeSet.add(recipes);
+        user.setRecipes(recipeSet);
+
+        return user;
+    }
+    private User newUser2(Recipe recipes) {
+        User user = new User();
+        user.setId(2L);
+        user.setEmail("john@google.com");
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setFullName("John Doe");
         Set<Recipe> recipeSet = new HashSet<>();
         recipeSet.add(recipes);
         user.setRecipes(recipeSet);

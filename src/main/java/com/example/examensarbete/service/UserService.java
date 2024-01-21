@@ -3,29 +3,46 @@ package com.example.examensarbete.service;
 import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.UserRepository;
+import com.example.examensarbete.utils.AuthenticationFacade;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    @Value("${ADMIN_EMAIL}")
-    private String adminEmail;
+    private final AuthenticationFacade authenticationFacade;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       AuthenticationFacade authenticationFacade) {
         this.userRepository = userRepository;
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(RuntimeException::new);
+    public User getUserById(Long id) throws AccessDeniedException {
+        var userCheck = userRepository.findById(id);
+        String userEmail = authenticationFacade.getEmail();
+        Set<String> userRoles = authenticationFacade.getRoles();
+
+        if (userCheck.isPresent()) {
+            if ((userRoles.contains("OIDC_ADMIN") || userEmail.equals(userCheck.get().getEmail()))) {
+                return userCheck.get();
+            }else {
+                throw new AccessDeniedException("Access denied");
+            }
+        } else {
+            throw new RuntimeException("User with the id: " + id + " was not found");
+        }
+
     }
 
     @Transactional
@@ -56,14 +73,6 @@ public class UserService {
         } else {
             throw new RuntimeException("User with the ID: " + id + " was not found.");
         }
-    }
-
-    //Replace with annotations once I get ROLES_ to work
-    public boolean checkPermission(GoogleUser googleUser) {
-        var adminCheck = userRepository.findByEmail(googleUser.email())
-                .orElseThrow(() -> new RuntimeException("Admin user not found"));
-
-        return adminCheck.getEmail().equals(adminEmail);
     }
 
     private User updateUserMethod(User user, GoogleUser googleUser) {
