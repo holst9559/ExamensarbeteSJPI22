@@ -101,12 +101,20 @@ public class RecipeService {
     public List<Recipe> getRecipesByUserId(Long userId) {
         Set<String> userRoles = authenticationFacade.getRoles();
         String userEmail = authenticationFacade.getEmail();
-        User user = userRepository.findByEmail(userEmail).orElseThrow(RuntimeException::new);
+        var userCheck = userRepository.findByEmail(userEmail);
 
-        if (userRoles.contains("OIDC_ADMIN") || userId.equals(user.getId())) {
-            return recipeRepository.findByUserId(userId);
+        if(userCheck.isPresent()){
+            if (userRoles.contains("OIDC_ADMIN") || userId.equals(userCheck.get().getId())) {
+                return recipeRepository.findByUserId(userId);
+            }else {
+                return recipeRepository.findByVisibleAndUserId(true, userId);
+            }
+
+        }else {
+            throw new RuntimeException("User not found");
         }
-        return recipeRepository.findByVisibleAndUserId(true, userId);
+
+
     }
 
     @Transactional

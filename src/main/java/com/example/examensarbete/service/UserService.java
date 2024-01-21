@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 
@@ -26,14 +28,18 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) {
+    public User getUserById(Long id) throws AccessDeniedException {
         var userCheck = userRepository.findById(id);
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
 
-        if(userCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(userCheck.get().getEmail()))){
-            return userCheck.get();
-        }else {
+        if (userCheck.isPresent()) {
+            if ((userRoles.contains("OIDC_ADMIN") || userEmail.equals(userCheck.get().getEmail()))) {
+                return userCheck.get();
+            }else {
+                throw new AccessDeniedException("Access denied");
+            }
+        } else {
             throw new RuntimeException("User with the id: " + id + " was not found");
         }
 

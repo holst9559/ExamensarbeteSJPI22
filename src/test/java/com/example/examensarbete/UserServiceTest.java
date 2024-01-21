@@ -4,6 +4,7 @@ import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.UserService;
+import com.example.examensarbete.utils.AuthenticationFacade;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,8 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -22,6 +25,9 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AuthenticationFacade authenticationFacade;
 
     @InjectMocks
     private UserService userService;
@@ -39,26 +45,85 @@ public class UserServiceTest {
         assertEquals(2, users.size());
     }
 
-    @Test
-    void getUserById_UserFound() {
-        // Mocking Repository Behavior
-        Long userId = 1L;
-        User user = createUser(1L, "anton@example.com", "Anton", "Holst");
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        // Method Invocation and Assertion
+
+    @Test
+    void testGetUserById_AdminRole_Success() throws AccessDeniedException {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(authenticationFacade.getEmail()).thenReturn("anton@example.com");
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+
+        // Act
         User result = userService.getUserById(userId);
-        assertEquals(user, result);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(mockUser, result);
+
+        // Verify that findById and other methods were called as expected
+        verify(userRepository, times(1)).findById(userId);
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
     }
 
     @Test
-    void getUserById_UserNotFound() {
-        // Mocking Repository Behavior
+    void testGetUserById_NonAdminRole_Success() throws AccessDeniedException {
+        // Arrange
         Long userId = 1L;
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(authenticationFacade.getEmail()).thenReturn("anton@example.com");
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
 
-        // Method Invocation and Assertion
+        // Act
+        User result = userService.getUserById(userId);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(mockUser, result);
+
+        // Verify that findById and other methods were called as expected
+        verify(userRepository, times(1)).findById(userId);
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
+    }
+
+    @Test
+    void testGetUserById_UserNotFound_ThrowsException() {
+        // Arrange
+        Long userId = 3L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(authenticationFacade.getEmail()).thenReturn("user@example.com");
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("USER"));
+
+        // Act and Assert
         assertThrows(RuntimeException.class, () -> userService.getUserById(userId));
+
+        // Verify that findById and other methods were called as expected
+        verify(userRepository, times(1)).findById(userId);
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
+    }
+
+    @Test
+    void testGetUserById_AccessDenied_ThrowsException() {
+        // Arrange
+        Long userId = 1L;
+        User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(authenticationFacade.getEmail()).thenReturn("user@example.com");
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("USER"));
+
+        // Act and Assert
+        assertThrows(AccessDeniedException.class, () -> userService.getUserById(userId));
+
+        // Verify that findById and other methods were called as expected
+        verify(userRepository, times(1)).findById(userId);
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
     }
 
     @Test
