@@ -4,6 +4,7 @@ import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.service.IngredientService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,12 +22,10 @@ public class IngredientController {
         this.ingredientService = ingredientService;
     }
 
-
     @GetMapping
     public List<Ingredient> getAllIngredients() {
         return ingredientService.getAllIngredients();
     }
-
 
     @GetMapping("/{id}")
     public Ingredient getIngredientById(@PathVariable Long id) {
@@ -47,11 +46,13 @@ public class IngredientController {
         return ResponseEntity.created(locationURI).body(created);
     }
 
+    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
         return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
 
+    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
         ingredientService.deleteIngredient(id);
