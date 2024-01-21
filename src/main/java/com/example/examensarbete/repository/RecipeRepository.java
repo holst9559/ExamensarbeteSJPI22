@@ -14,5 +14,9 @@ import java.util.Set;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Optional<Recipe> findByTitle(String title);
     List<Recipe> searchByRecipeIngredientsIn(Collection<Set<RecipeIngredient>> recipeIngredients);
+    List<Recipe> findByVisibleAndRecipeIngredientsIn(Boolean visible, Collection<Set<RecipeIngredient>> recipeIngredients);
     List<Recipe> findByUserId(Long userId);
+    List<Recipe> findByVisibleAndUserId(Boolean visible, Long userId);
+    List<Recipe> findByVisible(Boolean visible);
+    List<Recipe> findByUserEmail(String email);
 }

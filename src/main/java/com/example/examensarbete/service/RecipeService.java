@@ -4,15 +4,19 @@ import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.*;
 import com.example.examensarbete.repository.*;
+import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class RecipeService {
@@ -21,17 +25,17 @@ public class RecipeService {
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeCreator recipeCreator;
     private final IngredientRepository ingredientRepository;
+    private final AuthService authService;
+    private final AuthenticationFacade authenticationFacade;
 
-    public RecipeService(RecipeRepository recipeRepository,
-                         UserRepository userRepository,
-                         RecipeIngredientRepository recipeIngredientRepository,
-                         RecipeCreator recipeCreator,
-                         IngredientRepository ingredientRepository) {
+    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, RecipeIngredientRepository recipeIngredientRepository, RecipeCreator recipeCreator, IngredientRepository ingredientRepository, AuthService authService, AuthenticationFacade authenticationFacade) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.recipeIngredientRepository = recipeIngredientRepository;
         this.recipeCreator = recipeCreator;
         this.ingredientRepository = ingredientRepository;
+        this.authService = authService;
+        this.authenticationFacade = authenticationFacade;
     }
 
     private static Recipe updateRecipe(Recipe recipe, RecipeDto recipeDto) {
@@ -50,8 +54,20 @@ public class RecipeService {
         return recipe;
     }
 
+
     public List<Recipe> getAllRecipes() {
         return recipeRepository.findAll();
+    }
+
+    public List<Recipe> getAllPublicRecipes() {
+        String email = authenticationFacade.getEmail();
+
+        if (email != null) {
+            List<Recipe> publicRecipes = recipeRepository.findByVisible(true);
+            List<Recipe> userRecipes = recipeRepository.findByUserEmail(email);
+            return Stream.concat(publicRecipes.stream(), userRecipes.stream()).distinct().toList();
+        }
+        return recipeRepository.findByVisible(true);
     }
 
     public Recipe getRecipeById(Long id) {
@@ -63,26 +79,36 @@ public class RecipeService {
     }
 
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
+        Set<String> userRoles = authenticationFacade.getRoles();
+
+        if (userRoles.contains("OIDC_ADMIN")) {
+            return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(getFilteredRecipeIngredients(ingredients)));
+        }
+        String userEmail = authenticationFacade.getEmail();
+        List<Recipe> userRecipes = recipeRepository.findByUserEmail(userEmail);
+        List<Recipe> publicRecipes = recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(getFilteredRecipeIngredients(ingredients)));
+
+        return Stream.concat(userRecipes.stream(), publicRecipes.stream()).distinct().toList();
+
+    }
+
+    private Set<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
         List<RecipeIngredient> filteredIngredients = recipeIngredientRepository.findAll();
-        Set<RecipeIngredient> filteredSet = filteredIngredients.stream()
-                .filter(recipeIngredient -> {
-                    String ingredientName = recipeIngredient.getIngredientName();
-                    return ingredientName != null && ingredients.contains(ingredientName);
-                })
-                .collect(Collectors.toSet());
-
-        List<Recipe> matchingRecipes = recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(filteredSet));
-
-        return matchingRecipes.stream()
-                .filter(recipe -> recipe.getRecipeIngredients().stream()
-                        .map(RecipeIngredient::getIngredient)
-                        .map(Ingredient::getName)
-                        .allMatch(ingredients::contains))
-                .toList();
+        return filteredIngredients.stream().filter(recipeIngredient -> {
+            String ingredientName = recipeIngredient.getIngredientName();
+            return ingredientName != null && ingredients.contains(ingredientName);
+        }).collect(Collectors.toSet());
     }
 
     public List<Recipe> getRecipesByUserId(Long userId) {
-        return recipeRepository.findByUserId(userId);
+        Set<String> userRoles = authenticationFacade.getRoles();
+        String userEmail = authenticationFacade.getEmail();
+        User user = userRepository.findByEmail(userEmail).orElseThrow(RuntimeException::new);
+
+        if (userRoles.contains("OIDC_ADMIN") || userId.equals(user.getId())) {
+            return recipeRepository.findByUserId(userId);
+        }
+        return recipeRepository.findByVisibleAndUserId(true, userId);
     }
 
     @Transactional
@@ -103,8 +129,10 @@ public class RecipeService {
     @Transactional
     public Recipe editRecipe(Long id, @Validated RecipeDto recipeDto) {
         var recipeCheck = recipeRepository.findById(id);
+        String userEmail = authenticationFacade.getEmail();
+        Set<String> userRoles = authenticationFacade.getRoles();
 
-        if (recipeCheck.isPresent()) {
+        if (recipeCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipeCheck.get().getUser().getEmail()))) {
             Recipe recipeToUpdate = updateRecipe(recipeCheck.get(), recipeDto);
 
             return recipeRepository.save(recipeToUpdate);
@@ -116,12 +144,14 @@ public class RecipeService {
     @Transactional
     public void deleteRecipe(Long id) {
         var recipeCheck = recipeRepository.findById(id);
+        String userEmail = authenticationFacade.getEmail();
+        Set<String> userRoles = authenticationFacade.getRoles();
 
-        if (recipeCheck.isEmpty()) {
+        if (recipeCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipeCheck.get().getUser().getEmail()))) {
+            recipeRepository.deleteById(id);
+        } else {
             throw new RuntimeException("Recipe with the id: " + id + " was not found");
         }
-        recipeRepository.deleteById(id);
     }
-
 
 }
