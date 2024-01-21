@@ -27,6 +27,7 @@ public class AuthController {
         return "auth/index";
     }
 
+    /*
     @GetMapping("/user")
     public ResponseEntity<Object> getUserData(@AuthenticationPrincipal OAuth2User principal){
         try{
@@ -39,4 +40,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving data");
         }
     }
+
+     */
 }

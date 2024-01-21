@@ -3,21 +3,23 @@ package com.example.examensarbete.service;
 import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.repository.UserRepository;
+import com.example.examensarbete.utils.AuthenticationFacade;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final AuthenticationFacade authenticationFacade;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       AuthenticationFacade authenticationFacade) {
         this.userRepository = userRepository;
+        this.authenticationFacade = authenticationFacade;
     }
 
     public List<User> getAllUsers() {
@@ -25,7 +27,16 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(RuntimeException::new);
+        var userCheck = userRepository.findById(id);
+        String userEmail = authenticationFacade.getEmail();
+        Set<String> userRoles = authenticationFacade.getRoles();
+
+        if(userCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(userCheck.get().getEmail()))){
+            return userCheck.get();
+        }else {
+            throw new RuntimeException("User with the id: " + id + " was not found");
+        }
+
     }
 
     @Transactional

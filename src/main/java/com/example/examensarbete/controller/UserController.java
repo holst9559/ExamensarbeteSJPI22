@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@PreAuthorize("hasAuthority('OIDC_ADMIN')")
 @RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;
@@ -18,16 +17,19 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
+
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
+    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
