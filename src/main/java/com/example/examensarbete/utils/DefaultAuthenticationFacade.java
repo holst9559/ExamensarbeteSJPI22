@@ -35,4 +35,3 @@ public class DefaultAuthenticationFacade implements AuthenticationFacade {
         return null;
     }
 }
-

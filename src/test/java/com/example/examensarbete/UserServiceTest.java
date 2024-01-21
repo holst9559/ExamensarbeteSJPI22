@@ -45,8 +45,6 @@ public class UserServiceTest {
         assertEquals(2, users.size());
     }
 
-
-
     @Test
     void testGetUserById_AdminRole_Success() throws AccessDeniedException {
         // Arrange

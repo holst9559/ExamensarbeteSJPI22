@@ -74,7 +74,6 @@ public class RecipeController {
         return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecipe(@PathVariable Long id){
         recipeService.deleteRecipe(id);

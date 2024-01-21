@@ -6,4 +6,3 @@ public interface AuthenticationFacade {
     Set<String> getRoles();
     String getEmail();
 }
-
