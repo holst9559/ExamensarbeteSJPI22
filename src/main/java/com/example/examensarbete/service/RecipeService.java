@@ -3,6 +3,9 @@ package com.example.examensarbete.service;
 import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.*;
+import com.example.examensarbete.exception.RecipeAlreadyExistException;
+import com.example.examensarbete.exception.RecipeNotFoundException;
+import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.*;
 import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
@@ -22,17 +25,17 @@ public class RecipeService {
     private final UserRepository userRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeCreator recipeCreator;
-    private final IngredientRepository ingredientRepository;
-    private final AuthService authService;
     private final AuthenticationFacade authenticationFacade;
 
-    public RecipeService(RecipeRepository recipeRepository, UserRepository userRepository, RecipeIngredientRepository recipeIngredientRepository, RecipeCreator recipeCreator, IngredientRepository ingredientRepository, AuthService authService, AuthenticationFacade authenticationFacade) {
+    public RecipeService(RecipeRepository recipeRepository,
+                         UserRepository userRepository,
+                         RecipeIngredientRepository recipeIngredientRepository,
+                         RecipeCreator recipeCreator,
+                         AuthenticationFacade authenticationFacade) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
         this.recipeIngredientRepository = recipeIngredientRepository;
         this.recipeCreator = recipeCreator;
-        this.ingredientRepository = ingredientRepository;
-        this.authService = authService;
         this.authenticationFacade = authenticationFacade;
     }
 
@@ -68,11 +71,21 @@ public class RecipeService {
     }
 
     public Recipe getRecipeById(Long id) {
-        return recipeRepository.findById(id).orElseThrow(RuntimeException::new);
+        var recipeCheck = recipeRepository.findById(id);
+        if(recipeCheck.isPresent()){
+            return recipeCheck.get();
+        }else {
+            throw new RecipeNotFoundException(id);
+        }
     }
 
     public Recipe getRecipeByTitle(String title) {
-        return recipeRepository.findByTitle(title).orElseThrow(RuntimeException::new);
+        var recipeCheck = recipeRepository.findByTitle(title);
+        if(recipeCheck.isPresent()){
+            return recipeCheck.get();
+        }else {
+            throw new RecipeNotFoundException(title);
+        }
     }
 
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
@@ -81,12 +94,12 @@ public class RecipeService {
         if (userRoles.contains("OIDC_ADMIN")) {
             return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(getFilteredRecipeIngredients(ingredients)));
         }
+        //Check for mail validation??
         String userEmail = authenticationFacade.getEmail();
         List<Recipe> userRecipes = recipeRepository.findByUserEmail(userEmail);
         List<Recipe> publicRecipes = recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(getFilteredRecipeIngredients(ingredients)));
 
         return Stream.concat(userRecipes.stream(), publicRecipes.stream()).distinct().toList();
-
     }
 
     private Set<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
@@ -110,10 +123,8 @@ public class RecipeService {
             }
 
         }else {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException();
         }
-
-
     }
 
     @Transactional
@@ -127,7 +138,7 @@ public class RecipeService {
             Recipe recipe = recipeCreator.createRecipe(createRecipeDto, user);
             return recipeRepository.save(recipe);
         }
-        throw new IllegalArgumentException("Recipe with the title: " + createRecipeDto.title() + " already exist.");
+        throw new RecipeAlreadyExistException(createRecipeDto.title());
 
     }
 
@@ -142,7 +153,7 @@ public class RecipeService {
 
             return recipeRepository.save(recipeToUpdate);
         } else {
-            throw new RuntimeException("Recipe with the id: " + id + " was not found");
+            throw new RecipeNotFoundException(id);
         }
     }
 
@@ -155,7 +166,7 @@ public class RecipeService {
         if (recipeCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipeCheck.get().getUser().getEmail()))) {
             recipeRepository.deleteById(id);
         } else {
-            throw new RuntimeException("Recipe with the id: " + id + " was not found");
+            throw new RecipeNotFoundException(id);
         }
     }
 

@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -44,28 +43,30 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .logoutSuccessUrl("/login").permitAll())
-                .oauth2Login()
-                .successHandler(authenticationSuccessHandler);
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userAuthoritiesMapper(userAuthoritiesMapper()))
+                        .successHandler(authenticationSuccessHandler));
         return http.build();
     }
 
     @Bean
     public GrantedAuthoritiesMapper userAuthoritiesMapper() {
-        return (authorities) -> {
+        return authorities -> {
             Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
             authorities.forEach(authority -> {
-                if (OidcUserAuthority.class.isInstance(authority)) {
-                    OidcUserAuthority oidcUserAuthority = (OidcUserAuthority)authority;
-                    OAuth2UserAuthority oauth2UserAuthority = (OAuth2UserAuthority)authority;
+                GrantedAuthority mappedAuthority;
+                if (authority instanceof OidcUserAuthority oidcUserAuthority) {
+                    mappedAuthority = new OidcUserAuthority(
+                            "OIDC_USER", ((OidcUserAuthority) authority).getIdToken(), ((OidcUserAuthority) authority).getUserInfo()
+                    );
+                    Map<String, Object> attributes = oidcUserAuthority.getAttributes();
+                    String email = (String) attributes.get("email");
 
-                    String userInfo = oauth2UserAuthority.getAuthority();
-                    Map<String, Object> attribues = oidcUserAuthority.getAttributes();
-                    String email = (String) attribues.get("email");
-
-                    if(email.equals(adminEmail)){
+                    if (email.equals(adminEmail)) {
                         mappedAuthorities.add(new SimpleGrantedAuthority("OIDC_ADMIN"));
-                    }else {
-                        mappedAuthorities.add(new SimpleGrantedAuthority(userInfo));
+                    } else {
+                        mappedAuthorities.add(mappedAuthority);
                     }
                 }
             });

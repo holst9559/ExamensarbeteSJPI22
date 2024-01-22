@@ -25,13 +25,13 @@ public class UserController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public User getUserById(@PathVariable Long id) throws AccessDeniedException {
         return userService.getUserById(id);
     }
 
     @PreAuthorize("hasAuthority('OIDC_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.status(403).build();

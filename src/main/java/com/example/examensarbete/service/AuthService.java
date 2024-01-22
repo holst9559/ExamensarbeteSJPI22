@@ -1,6 +1,7 @@
 package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.GoogleUser;
+import com.example.examensarbete.exception.InvalidUserTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,7 +33,7 @@ public class AuthService {
             return type.cast(attribute);
         } else {
             logger.warn("Invalid or missing attribute '{}': {}", name, attribute);
-            return null;
+            throw new InvalidUserTypeException(name);
         }
     }
 }

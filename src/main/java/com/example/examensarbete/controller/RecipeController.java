@@ -40,7 +40,7 @@ public class RecipeController {
         return recipeService.getAllRecipes();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public Recipe getRecipeById(@PathVariable Long id){
         return recipeService.getRecipeById(id);
     }
@@ -55,7 +55,7 @@ public class RecipeController {
         return recipeService.getRecipesWithIngredients(ingredients);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{userId:\\d+}")
     public List<Recipe> getRecipesByUserId(@PathVariable Long userId){
         return recipeService.getRecipesByUserId(userId);
     }
@@ -69,12 +69,12 @@ public class RecipeController {
         return ResponseEntity.created(locationURI).body(created);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id:\\d+}")
     public ResponseEntity<Recipe> editRecipe(@PathVariable Long id,@RequestBody @Validated RecipeDto recipeDto){
         return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<?> deleteRecipe(@PathVariable Long id){
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();

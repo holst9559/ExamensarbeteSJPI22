@@ -2,6 +2,7 @@ package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
+import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.utils.AuthenticationFacade;
 import jakarta.transaction.Transactional;
@@ -40,7 +41,7 @@ public class UserService {
                 throw new AccessDeniedException("Access denied");
             }
         } else {
-            throw new RuntimeException("User with the id: " + id + " was not found");
+            throw new UserNotFoundException(id);
         }
 
     }
