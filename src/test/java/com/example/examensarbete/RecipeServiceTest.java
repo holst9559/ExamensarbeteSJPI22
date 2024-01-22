@@ -10,6 +10,7 @@ import com.example.examensarbete.dto.InstructionDto;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.dto.RecipeIngredientDto;
 import com.example.examensarbete.entities.*;
+import com.example.examensarbete.exception.RecipeAlreadyExistException;
 import com.example.examensarbete.repository.RecipeIngredientRepository;
 import com.example.examensarbete.repository.RecipeRepository;
 import com.example.examensarbete.repository.UserRepository;
@@ -240,7 +241,7 @@ class RecipeServiceTest {
         when(recipeRepository.findByTitle(recipeDto.title())).thenReturn(Optional.of(mockRecipe()));
 
         // Method Invocation and Assertion
-        assertThrows(IllegalArgumentException.class, () -> recipeService.addRecipe(recipeDto));
+        assertThrows(RecipeAlreadyExistException.class, () -> recipeService.addRecipe(recipeDto));
     }
 
     @Test

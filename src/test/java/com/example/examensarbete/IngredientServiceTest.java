@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
+import com.example.examensarbete.exception.IngredientAlreadyExistException;
 import com.example.examensarbete.repository.IngredientRepository;
 import com.example.examensarbete.service.IngredientService;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,7 @@ class IngredientServiceTest {
         when(ingredientRepository.findByName(ingredientDto.name())).thenReturn(Optional.of(createIngredient(1L, "Flour")));
 
         // Method Invocation and Assertion
-        assertThrows(IllegalArgumentException.class, () -> ingredientService.addIngredient(ingredientDto));
+        assertThrows(IngredientAlreadyExistException.class, () -> ingredientService.addIngredient(ingredientDto));
         verify(ingredientRepository, never()).save(any(Ingredient.class));
     }
 

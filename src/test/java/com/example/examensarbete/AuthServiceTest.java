@@ -1,6 +1,7 @@
 package com.example.examensarbete;
 
 import com.example.examensarbete.dto.GoogleUser;
+import com.example.examensarbete.exception.InvalidUserTypeException;
 import com.example.examensarbete.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,9 +70,9 @@ public class AuthServiceTest {
         // Verify that the missing attribute does not cause an issue
         assertEquals("John", googleUser.givenName());
         // The familyName should be null since it's missing
-        assertEquals(null, googleUser.familyName());
         assertEquals("John Doe", googleUser.fullName());
         assertEquals("john.doe@example.com", googleUser.email());
         assertEquals("https://example.com/picture.jpg", googleUser.picture());
+        assertThrows(InvalidUserTypeException.class, () -> authService.getUserData(mockPrincipal));
     }
 }

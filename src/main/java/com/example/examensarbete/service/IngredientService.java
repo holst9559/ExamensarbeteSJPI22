@@ -6,16 +6,13 @@ import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.exception.IngredientAlreadyExistException;
 import com.example.examensarbete.exception.IngredientApiException;
 import com.example.examensarbete.exception.IngredientNotFoundException;
-import com.example.examensarbete.exception.ResourceNotFoundException;
 import com.example.examensarbete.repository.IngredientRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.List;
