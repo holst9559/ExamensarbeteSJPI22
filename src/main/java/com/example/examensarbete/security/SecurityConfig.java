@@ -39,7 +39,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .logout(l -> l
-                        .deleteCookies("JSESSIONID")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .logoutSuccessUrl("/login").permitAll())

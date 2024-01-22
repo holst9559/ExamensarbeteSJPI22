@@ -65,14 +65,8 @@ public class AuthServiceTest {
         when(mockPrincipal.getAttributes()).thenReturn(attributes);
 
         // Call the method under test
-        GoogleUser googleUser = authService.getUserData(mockPrincipal);
 
         // Verify that the missing attribute does not cause an issue
-        assertEquals("John", googleUser.givenName());
-        // The familyName should be null since it's missing
-        assertEquals("John Doe", googleUser.fullName());
-        assertEquals("john.doe@example.com", googleUser.email());
-        assertEquals("https://example.com/picture.jpg", googleUser.picture());
         assertThrows(InvalidUserTypeException.class, () -> authService.getUserData(mockPrincipal));
     }
 }
