@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.example.examensarbete.dto.IngredientDto;
 import com.example.examensarbete.entities.Ingredient;
 import com.example.examensarbete.exception.IngredientAlreadyExistException;
+import com.example.examensarbete.exception.IngredientNotFoundException;
 import com.example.examensarbete.repository.IngredientRepository;
 import com.example.examensarbete.service.IngredientService;
 import org.junit.jupiter.api.Test;
@@ -117,10 +118,18 @@ class IngredientServiceTest {
         IngredientDto ingredientDto = createIngredientDto("Sugar");
         Ingredient existingIngredient = createIngredient(ingredientId, "Flour");
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(existingIngredient));
+        when(ingredientRepository.save(any(Ingredient.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Method Invocation and Assertion
-        assertDoesNotThrow(() -> ingredientService.editIngredient(ingredientId, ingredientDto));
+        // Call the editIngredient method
+        Ingredient updatedIngredient = ingredientService.editIngredient(ingredientId, ingredientDto);
+
+        // Verify that the repository save method is called once with the correct argument
         verify(ingredientRepository, times(1)).save(any(Ingredient.class));
+
+        // Assert that the returned ingredient is the expected one
+        assertDoesNotThrow(() -> ingredientService.editIngredient(ingredientId, ingredientDto));
+        assertEquals(updatedIngredient.getId(), ingredientDto.id());
+        assertEquals(updatedIngredient.getName(), ingredientDto.name());
     }
 
     @Test
@@ -144,7 +153,7 @@ class IngredientServiceTest {
 
         // Method Invocation
         assertDoesNotThrow(() -> ingredientService.deleteIngredient(ingredientId));
-        verify(ingredientRepository, times(1)).deleteById(ingredientId);
+        verify(ingredientRepository, times(1)).delete(existingIngredient);
     }
 
     @Test
