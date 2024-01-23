@@ -27,12 +27,12 @@ public class IngredientController {
         return ingredientService.getAllIngredients();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public Ingredient getIngredientById(@PathVariable Long id) {
         return ingredientService.getIngredientById(id);
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/{name:.*\\D.*}")
     public Ingredient getIngredientByName(@PathVariable String name) {
         return ingredientService.getIngredientByName(name);
     }
@@ -47,13 +47,13 @@ public class IngredientController {
     }
 
     @PreAuthorize("hasAuthority('OIDC_ADMIN')")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id:\\d+}")
     public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
         return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
 
     @PreAuthorize("hasAuthority('OIDC_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
         ingredientService.deleteIngredient(id);
         return ResponseEntity.noContent().build();

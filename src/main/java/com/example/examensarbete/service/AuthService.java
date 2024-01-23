@@ -1,6 +1,7 @@
 package com.example.examensarbete.service;
 
 import com.example.examensarbete.dto.GoogleUser;
+import com.example.examensarbete.exception.MissingUserAttributeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,8 @@ public class AuthService {
         String email = getAttribute(attributes, "email", String.class);
         String picture = getAttribute(attributes, "picture", String.class);
 
+        logger.info("Returned user data: 'givenName={}, familyName={}, fullName={}, email={}, picture={}'",
+                givenName, familyName, fullName, email, picture);
         return new GoogleUser(givenName, familyName, fullName, email, picture);
     }
 
@@ -32,7 +35,7 @@ public class AuthService {
             return type.cast(attribute);
         } else {
             logger.warn("Invalid or missing attribute '{}': {}", name, attribute);
-            return null;
+            throw new MissingUserAttributeException(name);
         }
     }
 }
