@@ -1,7 +1,7 @@
 package com.example.examensarbete;
 
 import com.example.examensarbete.dto.GoogleUser;
-import com.example.examensarbete.exception.InvalidUserTypeException;
+import com.example.examensarbete.exception.MissingUserAttributeException;
 import com.example.examensarbete.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,6 +67,6 @@ public class AuthServiceTest {
         // Call the method under test
 
         // Verify that the missing attribute does not cause an issue
-        assertThrows(InvalidUserTypeException.class, () -> authService.getUserData(mockPrincipal));
+        assertThrows(MissingUserAttributeException.class, () -> authService.getUserData(mockPrincipal));
     }
 }

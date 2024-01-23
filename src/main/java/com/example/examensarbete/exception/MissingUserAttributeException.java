@@ -1,11 +1,11 @@
 package com.example.examensarbete.exception;
 
-public class InvalidUserTypeException extends IllegalArgumentException{
-    public InvalidUserTypeException(){
+public class MissingUserAttributeException extends IllegalArgumentException{
+    public MissingUserAttributeException(){
         super("Invalid or missing attributes");
     }
 
-    public InvalidUserTypeException(String name){
+    public MissingUserAttributeException(String name){
         super("Invalid or missing attributes for user: " + name);
     }
 
