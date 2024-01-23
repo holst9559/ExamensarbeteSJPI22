@@ -40,7 +40,7 @@ public class IngredientService {
     public Ingredient getIngredientById(Long id) {
         return ingredientRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("Ingredient not found with id: '{}' ,called from method: {}", id, Thread.currentThread().getStackTrace());
+                    logger.error("Ingredient not found with id: '{}'", id);
                     return new IngredientNotFoundException(id);
                 });
     }
@@ -48,7 +48,7 @@ public class IngredientService {
     public Ingredient getIngredientByName(String name) {
         return ingredientRepository.findByName(name)
                 .orElseThrow(() -> {
-                    logger.error("Ingredient not found with name: '{}' ,called from method: {}", name, Thread.currentThread().getStackTrace());
+                    logger.error("Ingredient not found with name: '{}'", name);
                     return new IngredientNotFoundException(name);
                 });
     }
@@ -57,7 +57,7 @@ public class IngredientService {
     public Ingredient addIngredient(@Validated IngredientDto ingredientDto) {
         ingredientRepository.findByName(ingredientDto.name())
                 .ifPresent(existingIngredient -> {
-                    logger.error("Ingredient already exists with name: '{}', called from method: {}", ingredientDto.name(), Thread.currentThread().getStackTrace());
+                    logger.error("Ingredient already exists with name: '{}'", ingredientDto.name());
                     throw new IngredientAlreadyExistException(ingredientDto.name());
                 });
 
@@ -77,7 +77,7 @@ public class IngredientService {
                     return ingredientRepository.save(ingredientToUpdate);
                 })
                 .orElseThrow(() -> {
-                    logger.error("Ingredient not found with id: '{}' ,called from method: {}", id, Thread.currentThread().getStackTrace());
+                    logger.error("Ingredient not found with id: '{}'", id);
                     return new IngredientNotFoundException(id);
                 });
     }
@@ -87,7 +87,7 @@ public class IngredientService {
         ingredientRepository.findById(id)
                 .ifPresentOrElse(ingredientRepository::delete,
                         () -> {
-                            logger.error("Ingredient not found with id: '{}' ,called from method: {}", id, Thread.currentThread().getStackTrace());
+                            logger.error("Ingredient not found with id: '{}'", id);
                             throw new IngredientNotFoundException(id);
                         });
     }

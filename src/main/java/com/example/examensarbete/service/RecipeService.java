@@ -10,8 +10,12 @@ import com.example.examensarbete.repository.*;
 import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -21,6 +25,7 @@ import java.util.stream.Stream;
 
 @Service
 public class RecipeService {
+    private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
     private final RecipeIngredientRepository recipeIngredientRepository;
@@ -65,33 +70,34 @@ public class RecipeService {
         if (email != null) {
             List<Recipe> publicRecipes = recipeRepository.findByVisible(true);
             List<Recipe> userRecipes = recipeRepository.findByUserEmail(email);
+            logger.info("Returned public and current user recipes");
             return Stream.concat(publicRecipes.stream(), userRecipes.stream()).distinct().toList();
         }
+        logger.info("Returned public recipes");
         return recipeRepository.findByVisible(true);
     }
 
     public Recipe getRecipeById(Long id) {
-        var recipeCheck = recipeRepository.findById(id);
-        if(recipeCheck.isPresent()){
-            return recipeCheck.get();
-        }else {
-            throw new RecipeNotFoundException(id);
-        }
+        return recipeRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Recipe not found with id: '{}'",id);
+                    return new RecipeNotFoundException(id);
+                });
     }
 
     public Recipe getRecipeByTitle(String title) {
-        var recipeCheck = recipeRepository.findByTitle(title);
-        if(recipeCheck.isPresent()){
-            return recipeCheck.get();
-        }else {
-            throw new RecipeNotFoundException(title);
-        }
+        return recipeRepository.findByTitle(title)
+                .orElseThrow(() -> {
+                    logger.error("Recipe not found with title: '{}'",title);
+                    return new RecipeNotFoundException(title);
+                });
     }
 
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
         Set<String> userRoles = authenticationFacade.getRoles();
 
         if (userRoles.contains("OIDC_ADMIN")) {
+            logger.info("Returned all recipes, Admin call");
             return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(getFilteredRecipeIngredients(ingredients)));
         }
         //Check for mail validation??
@@ -104,70 +110,89 @@ public class RecipeService {
 
     private Set<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
         List<RecipeIngredient> filteredIngredients = recipeIngredientRepository.findAll();
-        return filteredIngredients.stream().filter(recipeIngredient -> {
-            String ingredientName = recipeIngredient.getIngredientName();
-            return ingredientName != null && ingredients.contains(ingredientName);
-        }).collect(Collectors.toSet());
+        return filteredIngredients.stream()
+                .filter(recipeIngredient -> ingredients.contains(recipeIngredient.getIngredientName()))
+                .collect(Collectors.toSet());
     }
 
     public List<Recipe> getRecipesByUserId(Long userId) {
         Set<String> userRoles = authenticationFacade.getRoles();
         String userEmail = authenticationFacade.getEmail();
-        var userCheck = userRepository.findByEmail(userEmail);
 
-        if(userCheck.isPresent()){
-            if (userRoles.contains("OIDC_ADMIN") || userId.equals(userCheck.get().getId())) {
-                return recipeRepository.findByUserId(userId);
-            }else {
-                return recipeRepository.findByVisibleAndUserId(true, userId);
-            }
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserNotFoundException::new);
 
-        }else {
-            throw new UserNotFoundException();
+        if (userRoles.contains("OIDC_ADMIN") || userId.equals(user.getId())) {
+            logger.info("Returned all recipes from userId: '{}'", userId);
+            return recipeRepository.findByUserId(userId);
+        } else {
+            return recipeRepository.findByVisibleAndUserId(true, userId);
         }
     }
 
     @Transactional
     public Recipe addRecipe(@Validated CreateRecipeDto createRecipeDto) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication(); //Fix this once OAuth2 is implemented
+        //Fix this once OAuth2 is implemented
+        //User @AuthenticationPrincipal UserDetails userDetails
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        User user = userRepository.findByEmail(email).orElseThrow(RuntimeException::new);
-        var recipeCheck = recipeRepository.findByTitle(createRecipeDto.title());
-        if (recipeCheck.isEmpty()) {
-            Recipe recipe = recipeCreator.createRecipe(createRecipeDto, user);
-            return recipeRepository.save(recipe);
-        }
-        throw new RecipeAlreadyExistException(createRecipeDto.title());
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        String title = createRecipeDto.title();
+        recipeRepository.findByTitle(title)
+                .ifPresent(existingRecipe -> {
+                    logger.error("Recipe with title: '{}' already exist", title);
+                    throw new RecipeAlreadyExistException(title);
+                });
+
+        logger.info("Recipe was created with title: '{}", title);
+        Recipe recipe = recipeCreator.createRecipe(createRecipeDto, user);
+        return recipeRepository.save(recipe);
 
     }
 
     @Transactional
     public Recipe editRecipe(Long id, @Validated RecipeDto recipeDto) {
-        var recipeCheck = recipeRepository.findById(id);
-        String userEmail = authenticationFacade.getEmail();
-        Set<String> userRoles = authenticationFacade.getRoles();
+        var recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Recipe not found with id: '{}", id);
+                    return new RecipeNotFoundException(id);
+                });
 
-        if (recipeCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipeCheck.get().getUser().getEmail()))) {
-            Recipe recipeToUpdate = updateRecipe(recipeCheck.get(), recipeDto);
-
-            return recipeRepository.save(recipeToUpdate);
+        if (isUserAuthorized(recipe)) {
+            Recipe updatedRecipe = updateRecipe(recipe, recipeDto);
+            logger.info("Recipe updated with id: '{}'", id);
+            return recipeRepository.save(updatedRecipe);
         } else {
+            logger.error("User not authorized to edit recipe with id: '{}'", id);
             throw new RecipeNotFoundException(id);
         }
     }
 
     @Transactional
     public void deleteRecipe(Long id) {
-        var recipeCheck = recipeRepository.findById(id);
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Recipe not found with id: '{}", id);
+                    return new RecipeNotFoundException(id);
+                });
+
+        if (isUserAuthorized(recipe)) {
+            logger.info("Recipe deleted with id: '{}'", id);
+            recipeRepository.deleteById(id);
+        } else {
+            logger.error("User not authorized to delete recipe with id: '{}'", id);
+            throw new RecipeNotFoundException(id);
+        }
+    }
+
+    private boolean isUserAuthorized(Recipe recipe) {
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
 
-        if (recipeCheck.isPresent() && (userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipeCheck.get().getUser().getEmail()))) {
-            recipeRepository.deleteById(id);
-        } else {
-            throw new RecipeNotFoundException(id);
-        }
+        return userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
     }
 
 }
