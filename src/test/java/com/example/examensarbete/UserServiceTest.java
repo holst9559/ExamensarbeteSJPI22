@@ -2,6 +2,8 @@ package com.example.examensarbete;
 
 import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.entities.User;
+import com.example.examensarbete.exception.AuthorizationException;
+import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.utils.AuthenticationFacade;
@@ -46,14 +48,13 @@ public class UserServiceTest {
     }
 
     @Test
-    void testGetUserById_AdminRole_Success() throws AccessDeniedException {
+    void testGetUserById_AdminRole_Success() throws  AuthorizationException {
         // Arrange
         Long userId = 1L;
         User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(authenticationFacade.getEmail()).thenReturn("anton@example.com");
         when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
-
         // Act
         User result = userService.getUserById(userId);
 
@@ -62,13 +63,13 @@ public class UserServiceTest {
         assertEquals(mockUser, result);
 
         // Verify that findById and other methods were called as expected
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(2)).findById(userId);
         verify(authenticationFacade, times(1)).getEmail();
         verify(authenticationFacade, times(1)).getRoles();
     }
 
     @Test
-    void testGetUserById_NonAdminRole_Success() throws AccessDeniedException {
+    void testGetUserById_NonAdminRole_Success() throws AuthorizationException {
         // Arrange
         Long userId = 1L;
         User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
@@ -84,7 +85,7 @@ public class UserServiceTest {
         assertEquals(mockUser, result);
 
         // Verify that findById and other methods were called as expected
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(2)).findById(userId);
         verify(authenticationFacade, times(1)).getEmail();
         verify(authenticationFacade, times(1)).getRoles();
     }
@@ -94,16 +95,12 @@ public class UserServiceTest {
         // Arrange
         Long userId = 3L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        when(authenticationFacade.getEmail()).thenReturn("user@example.com");
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("USER"));
 
         // Act and Assert
-        assertThrows(RuntimeException.class, () -> userService.getUserById(userId));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(userId));
 
         // Verify that findById and other methods were called as expected
         verify(userRepository, times(1)).findById(userId);
-        verify(authenticationFacade, times(1)).getEmail();
-        verify(authenticationFacade, times(1)).getRoles();
     }
 
     @Test
@@ -116,10 +113,10 @@ public class UserServiceTest {
         when(authenticationFacade.getRoles()).thenReturn(Set.of("USER"));
 
         // Act and Assert
-        assertThrows(AccessDeniedException.class, () -> userService.getUserById(userId));
+        assertThrows(AuthorizationException.class, () -> userService.getUserById(userId));
 
         // Verify that findById and other methods were called as expected
-        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(2)).findById(userId);
         verify(authenticationFacade, times(1)).getEmail();
         verify(authenticationFacade, times(1)).getRoles();
     }
@@ -170,15 +167,36 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser_UserFoundAnd() {
+    void deleteUser_UserFoundAndDeleted() {
         // Mocking Repository Behavior
         Long userId = 1L;
         User userToDelete = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(userToDelete));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
 
         // Method Invocation and Assertion
         Assertions.assertDoesNotThrow(() -> userService.deleteUser(userId));
-        verify(userRepository, times(1)).deleteById(userId);
+        verify(userRepository, times(2)).findById(userId);
+        verify(userRepository, times(1)).delete(userToDelete);
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
+    }
+
+    @Test
+    void deleteUser_AccessDenied_ThrowsException() {
+        // Mocking Repository Behavior
+        Long userId = 1L;
+        User userToDelete = createUser(1L, "anton@example.com", "Anton", "Holst");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userToDelete));
+        when(authenticationFacade.getEmail()).thenReturn("user@example.com");
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+
+        // Method Invocation and Assertion
+        assertThrows(AuthorizationException.class, () -> userService.deleteUser(userId));
+        verify(userRepository, times(2)).findById(userId);
+        verify(userRepository, never()).deleteById(anyLong());
+        verify(authenticationFacade, times(1)).getEmail();
+        verify(authenticationFacade, times(1)).getRoles();
     }
 
     @Test
@@ -189,7 +207,7 @@ public class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Method Invocation and Assertion
-        assertThrows(RuntimeException.class, () -> userService.deleteUser(userId));
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
         verify(userRepository, never()).deleteById(anyLong());
     }
 

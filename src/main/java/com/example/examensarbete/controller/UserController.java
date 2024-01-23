@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+import com.example.examensarbete.exception.AuthorizationException;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.entities.User;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +27,13 @@ public class UserController {
 
 
     @GetMapping("/{id:\\d+}")
-    public User getUserById(@PathVariable Long id) throws AccessDeniedException {
+    public User getUserById(@PathVariable Long id) throws AuthorizationException {
         return userService.getUserById(id);
     }
 
     @PreAuthorize("hasAuthority('OIDC_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) throws AuthorizationException {
         userService.deleteUser(id);
         return ResponseEntity.status(403).build();
     }

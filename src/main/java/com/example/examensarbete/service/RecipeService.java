@@ -180,8 +180,12 @@ public class RecipeService {
                 });
 
         if (isUserAuthorized(recipe)) {
-            logger.info("Recipe deleted with id: '{}'", id);
-            recipeRepository.deleteById(id);
+            try {
+                recipeRepository.deleteById(id);
+                logger.info("Recipe deleted with id: '{}'", id);
+            } catch (Exception e){
+                logger.error("Failed to delete recipe with id: '{}'", id, e);
+            }
         } else {
             logger.error("User not authorized to delete recipe with id: '{}'", id);
             throw new RecipeNotFoundException(id);
