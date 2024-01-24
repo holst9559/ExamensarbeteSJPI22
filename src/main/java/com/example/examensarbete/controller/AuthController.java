@@ -19,6 +19,7 @@ import com.example.examensarbete.service.AuthService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 
@@ -45,14 +46,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> requestBody, HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal OAuth2User oAuth2User) {
+    public void login(@RequestBody Map<String, String> requestBody, HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal OAuth2User oAuth2User) throws IOException {
         User user = extractUserDetails(oAuth2User);
         String jwtToken = jwtTokenService.generateToken(user);
 
         Cookie cookie = new Cookie("JWT-TOKEN", jwtToken);
         cookie.setHttpOnly(true);
 
-        return ResponseEntity.ok("Login successful!");
+        response.sendRedirect("/api/v1/ingredients");
     }
 
     private User extractUserDetails(OAuth2User oauth2User) {
