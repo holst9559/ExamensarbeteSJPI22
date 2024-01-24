@@ -10,6 +10,7 @@ import com.example.examensarbete.utils.AuthenticationFacade;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -114,7 +115,7 @@ public class UserService {
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
 
-        return userRoles.contains("OIDC_ADMIN") || userCheck.isPresent() && userEmail.equals(userCheck.get().getEmail());
+        return userRoles.contains("ROLE_ADMIN") || userCheck.isPresent() && userEmail.equals(userCheck.get().getEmail());
     }
 
     private String getUpdateDetails(User updatedUser, GoogleUser googleUser) {

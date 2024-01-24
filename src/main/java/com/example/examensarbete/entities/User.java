@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -38,7 +37,7 @@ public class User implements Serializable {
     @Column(name = "email")
     private String email;
 
-    @Column(name ="picture_url")
+    @Column(name = "picture_url")
     private String pictureUrl;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -50,6 +49,13 @@ public class User implements Serializable {
         this.lastName = lastName;
         this.email = email;
         this.recipes = recipes;
+    }
+
+    public User(String firstName, String lastName, String fullName, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.fullName = fullName;
+        this.email = email;
     }
 
     @Override

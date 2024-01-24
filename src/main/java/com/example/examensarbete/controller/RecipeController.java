@@ -37,7 +37,7 @@ public class RecipeController {
         return recipeService.getAllPublicRecipes();
     }
 
-    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();

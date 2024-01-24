@@ -96,7 +96,7 @@ public class RecipeService {
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
         Set<String> userRoles = authenticationFacade.getRoles();
 
-        if (userRoles.contains("OIDC_ADMIN")) {
+        if (userRoles.contains("ROLE_ADMIN")) {
             logger.info("Returned all recipes, Admin call");
             return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(getFilteredRecipeIngredients(ingredients)));
         }
@@ -122,7 +122,7 @@ public class RecipeService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(UserNotFoundException::new);
 
-        if (userRoles.contains("OIDC_ADMIN") || userId.equals(user.getId())) {
+        if (userRoles.contains("ROLE_ADMIN") || userId.equals(user.getId())) {
             logger.info("Returned all recipes from userId: '{}'", userId);
             return recipeRepository.findByUserId(userId);
         } else {
@@ -132,13 +132,10 @@ public class RecipeService {
 
     @Transactional
     public Recipe addRecipe(@Validated CreateRecipeDto createRecipeDto) {
-        //Fix this once OAuth2 is implemented
-        //User @AuthenticationPrincipal UserDetails userDetails
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
+        String userEmail = authenticationFacade.getEmail();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
 
         String title = createRecipeDto.title();
         recipeRepository.findByTitle(title)
@@ -195,8 +192,12 @@ public class RecipeService {
     private boolean isUserAuthorized(Recipe recipe) {
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
-
-        return userRoles.contains("OIDC_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
+        System.out.println(userEmail);
+        if(userEmail != null){
+            return userRoles.contains("ROLE_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
+        }else{
+            return false;
+        }
     }
 
 }

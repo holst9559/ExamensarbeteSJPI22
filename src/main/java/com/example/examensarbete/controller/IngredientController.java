@@ -46,13 +46,13 @@ public class IngredientController {
         return ResponseEntity.created(locationURI).body(created);
     }
 
-    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping("/{id:\\d+}")
     public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
         return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
 
-    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
         ingredientService.deleteIngredient(id);

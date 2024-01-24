@@ -19,7 +19,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
@@ -31,7 +31,7 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    @PreAuthorize("hasAuthority('OIDC_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) throws AuthorizationException {
         userService.deleteUser(id);
