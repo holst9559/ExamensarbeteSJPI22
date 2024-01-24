@@ -54,7 +54,7 @@ public class UserServiceTest {
         User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(authenticationFacade.getEmail()).thenReturn("anton@example.com");
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_ADMIN"));
         // Act
         User result = userService.getUserById(userId);
 
@@ -75,7 +75,7 @@ public class UserServiceTest {
         User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(authenticationFacade.getEmail()).thenReturn("anton@example.com");
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_USER"));
 
         // Act
         User result = userService.getUserById(userId);
@@ -110,7 +110,7 @@ public class UserServiceTest {
         User mockUser = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(authenticationFacade.getEmail()).thenReturn("user@example.com");
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("USER"));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_USER"));
 
         // Act and Assert
         assertThrows(AuthorizationException.class, () -> userService.getUserById(userId));
@@ -172,7 +172,7 @@ public class UserServiceTest {
         Long userId = 1L;
         User userToDelete = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(userToDelete));
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_ADMIN"));
 
         // Method Invocation and Assertion
         Assertions.assertDoesNotThrow(() -> userService.deleteUser(userId));
@@ -189,7 +189,7 @@ public class UserServiceTest {
         User userToDelete = createUser(1L, "anton@example.com", "Anton", "Holst");
         when(userRepository.findById(userId)).thenReturn(Optional.of(userToDelete));
         when(authenticationFacade.getEmail()).thenReturn("user@example.com");
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
+        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_USER"));
 
         // Method Invocation and Assertion
         assertThrows(AuthorizationException.class, () -> userService.deleteUser(userId));

@@ -132,10 +132,10 @@ public class RecipeService {
 
     @Transactional
     public Recipe addRecipe(@Validated CreateRecipeDto createRecipeDto) {
-        String email = authenticationFacade.getEmail();
+        String userEmail = authenticationFacade.getEmail();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
 
         String title = createRecipeDto.title();
         recipeRepository.findByTitle(title)
@@ -192,8 +192,12 @@ public class RecipeService {
     private boolean isUserAuthorized(Recipe recipe) {
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
-
-        return userRoles.contains("ROLE_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
+        System.out.println(userEmail);
+        if(userEmail != null){
+            return userRoles.contains("ROLE_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
+        }else{
+            return false;
+        }
     }
 
 }
