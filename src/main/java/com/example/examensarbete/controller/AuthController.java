@@ -55,21 +55,6 @@ public class AuthController {
         return ResponseEntity.ok("Login successful!");
     }
 
-
-    @GetMapping("/loginSuccess")
-    public ResponseEntity<?> loginSuccess(HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          @AuthenticationPrincipal OAuth2User oAuth2User){
-
-        User user = extractUserDetails(oAuth2User);
-        String jwtToken = jwtTokenService.generateToken(user);
-
-        Cookie cookie = new Cookie("JWT-TOKEN", jwtToken);
-        cookie.setHttpOnly(true);
-
-        return ResponseEntity.ok("Login successful!");
-    }
-
     private User extractUserDetails(OAuth2User oauth2User) {
         if (oauth2User instanceof DefaultOAuth2User) {
             DefaultOAuth2User auth = (DefaultOAuth2User) oauth2User;
