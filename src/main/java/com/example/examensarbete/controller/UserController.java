@@ -28,13 +28,13 @@ public class UserController {
 
 
     @GetMapping("/{id:\\d+}")
-    public User getUserById(@PathVariable Long id) throws AuthorizationException {
+    public User getUserById(@PathVariable Integer id) throws AuthorizationException {
         return userService.getUserById(id);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) throws AuthorizationException {
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id) throws AuthorizationException {
         userService.deleteUser(id);
         return ResponseEntity.status(403).build();
     }

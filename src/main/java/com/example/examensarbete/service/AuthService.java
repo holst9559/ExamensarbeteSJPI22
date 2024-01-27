@@ -8,12 +8,16 @@ import com.example.examensarbete.repository.RoleRepository;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.security.jwt.JWTUtil;
 import com.example.examensarbete.utils.*;
+import com.google.gson.stream.JsonToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,16 +51,27 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(AuthenticationRequest request){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()
-                )
-        );
-        User principal = (User) authentication.getPrincipal();
-        UserDto userDto = userDtoMapper.apply(principal);
-        String token = jwtUtil.issueToken(userDto.email(), userDto.roles());
-        return new AuthenticationResponse(token, userDto);
+        System.out.println(request);
+        try{
+            final Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()
+                    )
+            );
+
+            User principal = (User) authentication.getPrincipal();
+
+            UserDto userDto = userDtoMapper.apply(principal);
+            System.out.println("USERDTO");
+            System.out.println(userDto);
+            String token = jwtUtil.issueToken(userDto.email(), userDto.roles());
+            return new AuthenticationResponse(token, userDto);
+        }catch (AuthenticationException e){
+            e.printStackTrace();
+        }
+        return new AuthenticationResponse(null, null);
+
     }
 
     public RegisterResponse register(RegisterRequest request){

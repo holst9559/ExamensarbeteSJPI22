@@ -27,9 +27,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) throws IOException {
-        System.out.println("TEST");
-        System.out.println(request);
-
         AuthenticationResponse response = authService.login(request);
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, response.token())

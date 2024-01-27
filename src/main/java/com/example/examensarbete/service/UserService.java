@@ -30,7 +30,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) throws AuthorizationException {
+    public User getUserById(Integer id) throws AuthorizationException {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("User not found with id: '{}", id);
@@ -46,40 +46,8 @@ public class UserService {
         }
     }
 
-    /*
     @Transactional
-    public void addUser(@Validated GoogleUser googleUser) {
-        var userCheck = userRepository.findByEmail(googleUser.email());
-        if (userCheck.isEmpty()) {
-            User user = updateUserMethod(new User(), googleUser);
-            userRepository.save(user);
-        } else {
-            logger.error("Email is already registered with email: '{}'", googleUser.email());
-            throw new IllegalArgumentException("Email is already registered.");
-        }
-    }
-
-    @Transactional
-    public void updateUser(@Validated GoogleUser googleUser) {
-        userRepository.findByEmail(googleUser.email())
-                .ifPresentOrElse(
-                        existingUser -> {
-                            User userToUpdate = updateUserMethod(existingUser, googleUser);
-                            try {
-                                userRepository.save(userToUpdate);
-                                logger.info("User with email: '{}' was updated. Details: {}", googleUser.email(), getUpdateDetails(userToUpdate, googleUser));
-                            } catch (Exception e) {
-                                logger.error("Failed to update user with email: '{}'", googleUser.email(), e);
-                            }
-                        },
-                        () -> logger.warn("User with email: '{}' not found. Update skipped.", googleUser.email())
-                );
-    }
-
-     */
-
-    @Transactional
-    public void deleteUser(Long id) throws AuthorizationException {
+    public void deleteUser(Integer id) throws AuthorizationException {
         User user = userRepository.findById(id).orElseThrow(() -> {
             logger.error("User not found with id: '{}", id);
             return new UserNotFoundException(id);
@@ -98,20 +66,8 @@ public class UserService {
             throw new AuthorizationException();
         }
     }
-    /*
 
-    private User updateUserMethod(User user, GoogleUser googleUser) {
-        user.setFirstName(googleUser.givenName());
-        user.setLastName(googleUser.familyName());
-        user.setFullName(googleUser.fullName());
-        user.setEmail(googleUser.email());
-        user.setPictureUrl(googleUser.picture());
-        return user;
-    }
-
-
-     */
-    public boolean isUserAuthorized(Long id) {
+    public boolean isUserAuthorized(Integer id) {
         var userCheck = userRepository.findById(id);
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();

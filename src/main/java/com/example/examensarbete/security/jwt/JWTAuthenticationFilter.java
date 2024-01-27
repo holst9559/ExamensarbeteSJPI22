@@ -1,6 +1,6 @@
 package com.example.examensarbete.security.jwt;
 
-import com.example.examensarbete.utils.CustomUserDetailsService;
+import com.example.examensarbete.utils.UserUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     public JWTAuthenticationFilter(JWTUtil jwtUtil,
-                                   CustomUserDetailsService userDetailsService){
+                                   UserUserDetailsService userDetailsService){
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }

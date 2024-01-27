@@ -14,7 +14,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("*")
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
@@ -23,8 +23,10 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping
     public List<Recipe> getAllPublicRecipes(){
+        System.out.println("TEST");
         return recipeService.getAllPublicRecipes();
     }
 

@@ -26,11 +26,11 @@ public class JWTUtil {
     }
 
     public String issueToken(String subject, String ...scopes){
-        return issueToken(subject, String.valueOf(Map.of("scopes", scopes)));
+        return issueToken(subject, Map.of("scopes", scopes));
     }
 
     public String issueToken(String subject, List<String> scopes){
-        return issueToken(subject, String.valueOf(Map.of("scopes", scopes)));
+        return issueToken(subject, Map.of("scopes", scopes));
     }
 
     public String issueToken(String subject, Map<String, Object> claims){
