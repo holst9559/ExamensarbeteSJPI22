@@ -2,6 +2,8 @@ package com.example.examensarbete.controller;
 
 import com.example.examensarbete.utils.AuthenticationRequest;
 import com.example.examensarbete.utils.AuthenticationResponse;
+import com.example.examensarbete.utils.RegisterRequest;
+import com.example.examensarbete.utils.RegisterResponse;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,17 @@ public class AuthController {
         AuthenticationResponse response = authService.login(request);
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, response.token())
+                .body(response);
+
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) throws IOException{
+        System.out.println(request);
+
+        RegisterResponse response = authService.register(request);
+
+        return ResponseEntity.ok()
                 .body(response);
 
     }

@@ -38,10 +38,10 @@ public class SecurityFilterChainConfig {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers(
-                        HttpMethod.POST,
-                        "/api/v1/auth/login"
-                )
+                .requestMatchers(HttpMethod.POST,
+                        "/api/v1/auth/login")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

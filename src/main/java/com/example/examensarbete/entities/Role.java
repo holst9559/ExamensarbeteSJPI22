@@ -1,6 +1,6 @@
 package com.example.examensarbete.entities;
 
-/*
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -46,4 +46,4 @@ public class Role implements Serializable {
     }
 }
 
- */
+
