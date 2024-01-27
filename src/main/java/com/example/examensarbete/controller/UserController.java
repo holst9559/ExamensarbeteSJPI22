@@ -11,6 +11,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("api/v1/users")
 public class UserController {
     private final UserService userService;

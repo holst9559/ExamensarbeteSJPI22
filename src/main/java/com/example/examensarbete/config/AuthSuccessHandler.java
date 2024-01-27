@@ -1,6 +1,5 @@
 package com.example.examensarbete.config;
 
-import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.UserService;
@@ -16,7 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
+/*
 @Component
 public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     private static final Logger logger = LoggerFactory.getLogger(AuthSuccessHandler.class);
@@ -55,3 +54,6 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     }
 }
 
+
+
+ */

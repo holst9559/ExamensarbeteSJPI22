@@ -14,6 +14,7 @@ import java.net.URI;
 import java.util.*;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("api/v1/ingredients")
 public class IngredientController {
     private final IngredientService ingredientService;

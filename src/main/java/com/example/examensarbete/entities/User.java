@@ -10,6 +10,7 @@ import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.*;
@@ -19,10 +20,10 @@ import java.util.*;
 @Entity
 @NoArgsConstructor
 @Table(name = "USER")
-public class User implements Serializable {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -30,15 +31,15 @@ public class User implements Serializable {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @NotEmpty
     @Column(name = "email")
     private String email;
 
-    @Column(name = "picture_url")
-    private String pictureUrl;
+    @Column(name = "password")
+    private String password;
+
+    @Column(name = "role")
+    private String role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
@@ -51,10 +52,9 @@ public class User implements Serializable {
         this.recipes = recipes;
     }
 
-    public User(String firstName, String lastName, String fullName, String email) {
+    public User(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.fullName = fullName;
         this.email = email;
     }
 
@@ -72,5 +72,35 @@ public class User implements Serializable {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 }

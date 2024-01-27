@@ -1,21 +1,11 @@
 package com.example.examensarbete.controller;
 
 import com.example.examensarbete.dto.CreateRecipeDto;
-import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Recipe;
-import com.example.examensarbete.entities.User;
-import com.example.examensarbete.repository.UserRepository;
-import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.RecipeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -24,6 +14,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;

@@ -1,7 +1,5 @@
 package com.example.examensarbete.service;
 
-import com.example.examensarbete.dto.GoogleUser;
-import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.exception.AuthorizationException;
 import com.example.examensarbete.exception.UserNotFoundException;
@@ -10,12 +8,9 @@ import com.example.examensarbete.utils.AuthenticationFacade;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 
@@ -51,6 +46,7 @@ public class UserService {
         }
     }
 
+    /*
     @Transactional
     public void addUser(@Validated GoogleUser googleUser) {
         var userCheck = userRepository.findByEmail(googleUser.email());
@@ -80,6 +76,8 @@ public class UserService {
                 );
     }
 
+     */
+
     @Transactional
     public void deleteUser(Long id) throws AuthorizationException {
         User user = userRepository.findById(id).orElseThrow(() -> {
@@ -100,6 +98,7 @@ public class UserService {
             throw new AuthorizationException();
         }
     }
+    /*
 
     private User updateUserMethod(User user, GoogleUser googleUser) {
         user.setFirstName(googleUser.givenName());
@@ -110,6 +109,8 @@ public class UserService {
         return user;
     }
 
+
+     */
     public boolean isUserAuthorized(Long id) {
         var userCheck = userRepository.findById(id);
         String userEmail = authenticationFacade.getEmail();
@@ -117,6 +118,7 @@ public class UserService {
 
         return userRoles.contains("ROLE_ADMIN") || userCheck.isPresent() && userEmail.equals(userCheck.get().getEmail());
     }
+    /*
 
     private String getUpdateDetails(User updatedUser, GoogleUser googleUser) {
         StringBuilder details = new StringBuilder("Updated details:\n");
@@ -132,4 +134,6 @@ public class UserService {
         return details.toString();
     }
 
+
+     */
 }

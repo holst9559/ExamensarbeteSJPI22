@@ -1,6 +1,5 @@
 package com.example.examensarbete;
 
-import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.exception.MissingUserAttributeException;
 import com.example.examensarbete.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.HashMap;
@@ -22,6 +20,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
+    /*
     @Mock
     private OAuth2User mockPrincipal;
 
@@ -69,4 +68,6 @@ public class AuthServiceTest {
         // Verify that the missing attribute does not cause an issue
         assertThrows(MissingUserAttributeException.class, () -> authService.getUserData(mockPrincipal));
     }
+
+     */
 }
