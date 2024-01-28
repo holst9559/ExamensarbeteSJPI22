@@ -1,5 +1,6 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
@@ -31,14 +31,17 @@ public class Recipe implements Serializable {
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "dish_id")
     private Dish dish;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "category_id")
     private Category category;
 

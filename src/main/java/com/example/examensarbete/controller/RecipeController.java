@@ -6,6 +6,7 @@ import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.service.RecipeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -14,7 +15,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
+//@CrossOrigin("http://localhost:3000/")
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
@@ -24,10 +25,10 @@ public class RecipeController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping
-    public List<Recipe> getAllPublicRecipes(){
-        System.out.println("TEST");
-        return recipeService.getAllPublicRecipes();
+    @GetMapping(produces = "application/json")
+    public ResponseEntity<List<Recipe>> getAllPublicRecipes(){
+        List<Recipe> recipes = recipeService.getAllPublicRecipes();
+        return ResponseEntity.ok().body(recipes);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

@@ -4,6 +4,8 @@ import com.example.examensarbete.utils.AuthenticationRequest;
 import com.example.examensarbete.utils.AuthenticationResponse;
 import com.example.examensarbete.utils.RegisterRequest;
 import com.example.examensarbete.utils.RegisterResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+//@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthService authService;
@@ -26,11 +28,19 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) throws IOException {
-        AuthenticationResponse response = authService.login(request);
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) throws IOException {
+        AuthenticationResponse responseObj = authService.login(request);
+
+        Cookie cookie = new Cookie("JWT-TOKEN", responseObj.token());
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(7200);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, response.token())
-                .body(response);
+                .header(HttpHeaders.AUTHORIZATION, responseObj.token())
+                .body(responseObj);
 
     }
 

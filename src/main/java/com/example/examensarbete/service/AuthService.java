@@ -51,7 +51,6 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(AuthenticationRequest request){
-        System.out.println(request);
         try{
             final Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -63,8 +62,6 @@ public class AuthService {
             User principal = (User) authentication.getPrincipal();
 
             UserDto userDto = userDtoMapper.apply(principal);
-            System.out.println("USERDTO");
-            System.out.println(userDto);
             String token = jwtUtil.issueToken(userDto.email(), userDto.roles());
             return new AuthenticationResponse(token, userDto);
         }catch (AuthenticationException e){
@@ -85,7 +82,6 @@ public class AuthService {
             user.setFirstName(request.firstName());
             user.setLastName(request.lastName());
             user.setPassword(passwordEncoder.encode(request.password()));
-            System.out.println(passwordEncoder.encode(request.password()));
             Role role = roleRepository.findByName("USER");
             Set<Role> roles = new HashSet<>();
             roles.add(role);

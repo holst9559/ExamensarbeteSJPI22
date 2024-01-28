@@ -1,5 +1,6 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,10 +24,12 @@ public class RecipeIngredient implements Serializable {
     private Long id;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinTable(name = "recipe_ingredient_usage", joinColumns = @JoinColumn(name = "recipe_ingredient_id"), inverseJoinColumns = @JoinColumn(name = "recipe_id"))
     private Set<Recipe> recipe;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
@@ -36,6 +39,7 @@ public class RecipeIngredient implements Serializable {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "unit_id")
     private Unit unit;
 
