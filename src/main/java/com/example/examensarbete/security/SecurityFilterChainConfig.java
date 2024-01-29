@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -35,26 +36,21 @@ public class SecurityFilterChainConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
                 .cors(Customizer.withDefaults())
-                .csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers(HttpMethod.POST,
-                        "/api/v1/auth/login")
-                .permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register")
-                .permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize ->
+                        authorize
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                                .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint);
+                .exceptionHandling(entryPoint -> entryPoint.authenticationEntryPoint(authenticationEntryPoint));
         return http.build();
 
     }
