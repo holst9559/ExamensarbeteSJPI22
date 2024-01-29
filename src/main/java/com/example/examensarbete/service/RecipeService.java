@@ -9,16 +9,19 @@ import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.*;
 import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,6 +34,8 @@ public class RecipeService {
     private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeCreator recipeCreator;
     private final AuthenticationFacade authenticationFacade;
+    @Value("${JWT_SECRET}")
+    private String SECRET_KEY;
 
     public RecipeService(RecipeRepository recipeRepository,
                          UserRepository userRepository,
@@ -77,14 +82,20 @@ public class RecipeService {
         return recipeRepository.findByVisible(true);
     }
 
+    @Transactional
     public Recipe getRecipeById(Integer id) {
-        return recipeRepository.findById(id)
+         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}'",id);
                     return new RecipeNotFoundException(id);
                 });
+        Hibernate.initialize(recipe.getInstructions());
+        Hibernate.initialize(recipe.getRecipeIngredients());
+
+        return recipe;
     }
 
+    @Transactional
     public Recipe getRecipeByTitle(String title) {
         return recipeRepository.findByTitle(title)
                 .orElseThrow(() -> {
@@ -137,8 +148,8 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe addRecipe(@Validated CreateRecipeDto createRecipeDto) {
-        String userEmail = authenticationFacade.getEmail();
+    public Recipe addRecipe(CreateRecipeDto createRecipeDto, HttpServletRequest request) {
+        String userEmail = extractUserEmailFromToken(request);
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
@@ -152,7 +163,9 @@ public class RecipeService {
 
         logger.info("Recipe was created with title: '{}", title);
         Recipe recipe = recipeCreator.createRecipe(createRecipeDto, user);
-        return recipeRepository.save(recipe);
+
+        recipeCreator.saveRecipeWithIngredientsAndInstructions(recipe);
+        return recipe;
 
     }
 
@@ -198,12 +211,30 @@ public class RecipeService {
     private boolean isUserAuthorized(Recipe recipe) {
         String userEmail = authenticationFacade.getEmail();
         Set<String> userRoles = authenticationFacade.getRoles();
-        System.out.println(userEmail);
         if(userEmail != null){
             return userRoles.contains("ROLE_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
         }else{
             return false;
         }
+    }
+
+    private String extractUserEmailFromToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwtToken = token.substring(7);
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
+            return claims.getSubject();
+        }
+        return null;
+    }
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
 }

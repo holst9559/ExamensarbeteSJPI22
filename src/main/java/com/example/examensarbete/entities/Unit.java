@@ -1,5 +1,6 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,6 +26,10 @@ public class Unit implements Serializable {
     @NotEmpty
     @Column(name = "unit_name")
     private String name;
+
+    @OneToMany(mappedBy = "unit", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Set<RecipeIngredient> recipeIngredients;
 
     public Unit(String name) {
         this.name = name;

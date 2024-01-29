@@ -9,9 +9,9 @@ import java.util.Set;
 public record CreateRecipeDto(
         @NotEmpty
         String title,
-        @NotEmpty
+        @NotNull
         Dish dish,
-        @NotEmpty
+        @NotNull
         Category category,
         @NotEmpty
         String description,
@@ -23,11 +23,12 @@ public record CreateRecipeDto(
         Integer servings,
         @NotNull
         Boolean visible,
-        @NotEmpty
+        @NotNull
         Set<InstructionDto> instructions ,
-        @NotEmpty
+        @NotNull
         Set<RecipeIngredientDto> recipeIngredients,
         String imgUrl,
+        @NotNull
         Diet diet
 ) {
 }

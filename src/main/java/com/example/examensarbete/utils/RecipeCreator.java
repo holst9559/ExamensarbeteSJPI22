@@ -5,7 +5,9 @@ import com.example.examensarbete.dto.RecipeIngredientDto;
 import com.example.examensarbete.entities.*;
 import com.example.examensarbete.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
 import java.util.Set;
@@ -20,6 +22,7 @@ public class RecipeCreator {
     private final IngredientRepository ingredientRepository;
     private final UnitRepository unitRepository;
     private final DietRepository dietRepository;
+    private final RecipeRepository recipeRepository;
 
     public RecipeCreator(
             DishRepository dishRepository,
@@ -28,7 +31,8 @@ public class RecipeCreator {
             RecipeIngredientRepository recipeIngredientRepository,
             IngredientRepository ingredientRepository,
             UnitRepository unitRepository,
-            DietRepository dietRepository) {
+            DietRepository dietRepository,
+            RecipeRepository recipeRepository) {
         this.dishRepository = dishRepository;
         this.categoryRepository = categoryRepository;
         this.instructionRepository = instructionRepository;
@@ -36,9 +40,11 @@ public class RecipeCreator {
         this.ingredientRepository = ingredientRepository;
         this.unitRepository = unitRepository;
         this.dietRepository = dietRepository;
+        this.recipeRepository = recipeRepository;
     }
 
-    public Recipe createRecipe(CreateRecipeDto createRecipeDto, User user) {
+    @Transactional
+    public Recipe createRecipe(@Validated CreateRecipeDto createRecipeDto, User user) {
         Recipe recipe = new Recipe();
         recipe.setUser(user);
         recipe.setTitle(createRecipeDto.title());
@@ -54,7 +60,6 @@ public class RecipeCreator {
         setInstructions(createRecipeDto, recipe);
         setRecipeIngredients(createRecipeDto, recipe);
         setDiet(createRecipeDto, recipe);
-
         return recipe;
     }
 
@@ -88,18 +93,21 @@ public class RecipeCreator {
         if (createRecipeDto.recipeIngredients() != null && !createRecipeDto.recipeIngredients().isEmpty()) {
             Set<RecipeIngredient> recipeIngredients = createRecipeDto.recipeIngredients().stream()
                     .map(ingredientDto -> {
-                        var ingredientCheck = ingredientRepository.findByName(ingredientDto.ingredientName()).orElseThrow(RuntimeException::new);
-                        var unitCheck = unitRepository.findByName(ingredientDto.unit()).orElseThrow(RuntimeException::new);
-                        var recipeIngredientCheck = recipeIngredientRepository.findByIngredientAndUnitAndAmount(
-                                ingredientCheck,
-                                unitCheck,
-                                ingredientDto.amount());
-                        if (recipeIngredientCheck.isPresent()) {
-                           return recipeIngredientCheck.get();
+                        ingredientRepository.findByName(ingredientDto.ingredient().name()).orElseThrow(RuntimeException::new);
+                        var unitCheck = unitRepository.findByName(ingredientDto.unit());
+                        if(unitCheck.isEmpty()){
+                            Unit newUnit = createNewUnit(ingredientDto.unit());
+                            RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto, newUnit);
+                            recipeIngredientRepository.save(newRecipeIngredient);
+                            return newRecipeIngredient;
+
+
+                        }else {
+                            RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto, unitCheck.get());
+                            recipeIngredientRepository.save(newRecipeIngredient);
+                            return newRecipeIngredient;
+
                         }
-                        RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto);
-                        recipeIngredientRepository.save(newRecipeIngredient);
-                        return newRecipeIngredient;
 
                     })
                     .collect(Collectors.toSet());
@@ -115,17 +123,35 @@ public class RecipeCreator {
         }
     }
 
-    private RecipeIngredient createNewRecipeIngredient(RecipeIngredientDto ingredientDto) {
+    private RecipeIngredient createNewRecipeIngredient(RecipeIngredientDto ingredientDto, Unit unitCheck) {
         RecipeIngredient recipeIngredient = new RecipeIngredient();
-        var ingredientCheck = ingredientRepository.findByName(ingredientDto.ingredientName())
-                .orElseThrow(() -> new EntityNotFoundException("Ingredient not found with name: " + ingredientDto.ingredientName()));
-        var unitCheck = unitRepository.findByName(ingredientDto.unit())
-                .orElseThrow(() -> new EntityNotFoundException("Unit not found with name: " + ingredientDto.unit()));
+        var ingredientCheck = ingredientRepository.findByName(ingredientDto.ingredient().name())
+                .orElseThrow(() -> new EntityNotFoundException("Ingredient not found with name: " + ingredientDto.ingredient().name()));
 
         recipeIngredient.setIngredient(ingredientCheck);
         recipeIngredient.setAmount(ingredientDto.amount());
         recipeIngredient.setUnit(unitCheck);
+        unitCheck.getRecipeIngredients().add(recipeIngredient);
 
         return recipeIngredient;
+    }
+
+    private Unit createNewUnit(String name) {
+        Unit unit = new Unit();
+        unit.setName(name);
+        return unitRepository.save(unit);
+    }
+
+    @Transactional
+    public void saveRecipeWithIngredientsAndInstructions(Recipe recipe) {
+        for (RecipeIngredient ingredient : recipe.getRecipeIngredients()) {
+            ingredient.setRecipe(Collections.singleton(recipe));
+        }
+
+        for (Instruction instruction : recipe.getInstructions()) {
+            instruction.setRecipe(recipe);
+        }
+
+        recipeRepository.save(recipe);
     }
 }

@@ -4,9 +4,10 @@ import com.example.examensarbete.dto.CreateRecipeDto;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.service.RecipeService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -36,12 +37,13 @@ public class RecipeController {
         return recipeService.getAllRecipes();
     }
 
+    @Transactional
     @GetMapping("/{id:\\d+}")
     public Recipe getRecipeById(@PathVariable Integer id){
         return recipeService.getRecipeById(id);
     }
 
-    @GetMapping("/{title}")
+    @GetMapping("/{title:.*\\D.*}")
     public Recipe getRecipeByTitle(@PathVariable String title){
         return recipeService.getRecipeByTitle(title);
     }
@@ -51,14 +53,14 @@ public class RecipeController {
         return recipeService.getRecipesWithIngredients(ingredients);
     }
 
-    @GetMapping("/{userId:\\d+}")
+    @GetMapping("/user/{userId:\\d+}")
     public List<Recipe> getRecipesByUserId(@PathVariable Integer userId){
         return recipeService.getRecipesByUserId(userId);
     }
 
     @PostMapping
-    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto){
-        var created = recipeService.addRecipe(recipeDto);
+    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto, HttpServletRequest request){
+        var created = recipeService.addRecipe(recipeDto, request);
 
         URI locationURI = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(created.getId()).toUri();
 

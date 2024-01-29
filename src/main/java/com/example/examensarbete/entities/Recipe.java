@@ -1,6 +1,7 @@
 package com.example.examensarbete.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -30,18 +31,18 @@ public class Recipe implements Serializable {
     @Column(name = "recipe_title")
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "dish_id")
     private Dish dish;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -66,19 +67,19 @@ public class Recipe implements Serializable {
     @Column(name = "visible")
     private Boolean visible;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "recipe")
-    @JsonIgnore
+    @OneToMany(mappedBy = "recipe", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Set<Instruction> instructions = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "recipe")
-    @JsonIgnore
+    @ManyToMany(mappedBy = "recipe", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JsonManagedReference
     private Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
     @Column(name = "img_url")
     private String imgUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "diet_id")
     private Diet diet;
 
@@ -131,11 +132,11 @@ public class Recipe implements Serializable {
         return prepTime + cookTime;
     }
 
-    private void addIngredient(RecipeIngredient recipeIngredient){
+    public void addIngredient(RecipeIngredient recipeIngredient){
         recipeIngredients.add(recipeIngredient);
     }
 
-    private void addInstruction(Instruction instruction){
+    public void addInstruction(Instruction instruction){
         instructions.add(instruction);
     }
 }

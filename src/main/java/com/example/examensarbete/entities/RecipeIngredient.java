@@ -1,6 +1,7 @@
 package com.example.examensarbete.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,13 +24,16 @@ public class RecipeIngredient implements Serializable {
     @Column(name = "recipe_ingredient_id")
     private Integer id;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinTable(name = "recipe_ingredient_usage", joinColumns = @JoinColumn(name = "recipe_ingredient_id"), inverseJoinColumns = @JoinColumn(name = "recipe_id"))
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
+    @JoinTable(
+            name = "recipe_ingredient_usage",
+            joinColumns = @JoinColumn(name = "recipe_ingredient_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipe_id"))
     private Set<Recipe> recipe;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 
@@ -38,9 +42,8 @@ public class RecipeIngredient implements Serializable {
         return (ingredient != null) ? ingredient.getName() : null;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
-    @JoinColumn(name = "unit_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("recipeIngredients")
     private Unit unit;
 
     @NotNull

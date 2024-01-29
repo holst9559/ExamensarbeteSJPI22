@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.example.examensarbete.dto.CreateRecipeDto;
-import com.example.examensarbete.dto.InstructionDto;
-import com.example.examensarbete.dto.RecipeDto;
-import com.example.examensarbete.dto.RecipeIngredientDto;
+import com.example.examensarbete.dto.*;
 import com.example.examensarbete.entities.*;
 import com.example.examensarbete.exception.RecipeAlreadyExistException;
 import com.example.examensarbete.repository.RecipeIngredientRepository;
@@ -359,8 +356,8 @@ class RecipeServiceTest {
         instructions.add(createNewInstructionDto("2", "Cook"));
 
         Set<RecipeIngredientDto> recipeIngredients = new HashSet<>();
-        recipeIngredients.add(createRecipeIngredientDto("flour", 200.0, "gram"));
-        recipeIngredients.add(createRecipeIngredientDto("eggs", 2.0, "pcs"));
+        recipeIngredients.add(createRecipeIngredientDto(new IngredientDto(1, "flour"), 200.0, "gram"));
+        recipeIngredients.add(createRecipeIngredientDto( new IngredientDto(4,"eggs"), 2.0, "pcs"));
 
         return new CreateRecipeDto("Pancakes",
                 new Dish("Other"),
@@ -460,9 +457,9 @@ class RecipeServiceTest {
         );
     }
 
-    private RecipeIngredientDto createRecipeIngredientDto(String ingredientName, Double amount, String unit) {
+    private RecipeIngredientDto createRecipeIngredientDto(IngredientDto ingredient, Double amount, String unit) {
         return new RecipeIngredientDto(
-                ingredientName,
+                ingredient,
                 amount,
                 unit
         );
