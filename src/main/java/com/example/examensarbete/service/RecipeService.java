@@ -7,7 +7,6 @@ import com.example.examensarbete.exception.RecipeAlreadyExistException;
 import com.example.examensarbete.exception.RecipeNotFoundException;
 import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.*;
-import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,11 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.security.Key;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -31,22 +28,16 @@ public class RecipeService {
     private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
     private final RecipeRepository recipeRepository;
     private final UserRepository userRepository;
-    private final RecipeIngredientRepository recipeIngredientRepository;
     private final RecipeCreator recipeCreator;
-    private final AuthenticationFacade authenticationFacade;
     @Value("${JWT_SECRET}")
     private String SECRET_KEY;
 
     public RecipeService(RecipeRepository recipeRepository,
                          UserRepository userRepository,
-                         RecipeIngredientRepository recipeIngredientRepository,
-                         RecipeCreator recipeCreator,
-                         AuthenticationFacade authenticationFacade) {
+                         RecipeCreator recipeCreator) {
         this.recipeRepository = recipeRepository;
         this.userRepository = userRepository;
-        this.recipeIngredientRepository = recipeIngredientRepository;
         this.recipeCreator = recipeCreator;
-        this.authenticationFacade = authenticationFacade;
     }
 
     private static Recipe updateRecipe(Recipe recipe, RecipeDto recipeDto) {
@@ -69,8 +60,9 @@ public class RecipeService {
         return recipeRepository.findAll();
     }
 
-    public List<Recipe> getAllPublicRecipes() {
-        String email = authenticationFacade.getEmail();
+    public List<Recipe> getAllPublicRecipes(HttpServletRequest request) {
+        Map<String, Object> userDetails = extractUserDetailsFromToken(request);
+        String email = (String) userDetails.get("email");
 
         if (email != null) {
             List<Recipe> publicRecipes = recipeRepository.findByVisible(true);
@@ -84,9 +76,9 @@ public class RecipeService {
 
     @Transactional
     public Recipe getRecipeById(Integer id) {
-         Recipe recipe = recipeRepository.findById(id)
+        Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
-                    logger.error("Recipe not found with id: '{}'",id);
+                    logger.error("Recipe not found with id: '{}'", id);
                     return new RecipeNotFoundException(id);
                 });
         Hibernate.initialize(recipe.getInstructions());
@@ -99,47 +91,20 @@ public class RecipeService {
     public Recipe getRecipeByTitle(String title) {
         return recipeRepository.findByTitle(title)
                 .orElseThrow(() -> {
-                    logger.error("Recipe not found with title: '{}'",title);
+                    logger.error("Recipe not found with title: '{}'", title);
                     return new RecipeNotFoundException(title);
                 });
     }
 
-    public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
-        Set<String> userRoles = authenticationFacade.getRoles();
+    public List<Recipe> getRecipesByUserId(Integer userId, HttpServletRequest request) {
+        Map<String, Object> userDetails = extractUserDetailsFromToken(request);
+        String email = (String) userDetails.get("email");
+        List<String> roles = (List<String>) userDetails.get("roles");
 
-        List<RecipeIngredient> ingredientList = getFilteredRecipeIngredients(ingredients);
-
-        if (userRoles.contains("ROLE_ADMIN")) {
-            System.out.println("ADMIN USER");
-            logger.info("Returned all recipes, Admin call");
-            return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(ingredientList)));
-        }
-
-        //Check for mail validation??
-        String userEmail = authenticationFacade.getEmail();
-        System.out.println("BEFORE USER");
-        List<Recipe> userRecipes = recipeRepository.findByUserEmail(userEmail);
-        System.out.println("BEFORE PUBLIC");
-        List<Recipe> publicRecipes = recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(ingredientList)));
-
-        System.out.println("BEFORE CONCAT");
-        return Stream.concat(userRecipes.stream(), publicRecipes.stream()).distinct().toList();
-    }
-
-    private List<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
-        List<RecipeIngredient> filteredIngredients = recipeIngredientRepository.findAll();
-        return filteredIngredients.stream()
-                .filter(recipeIngredient -> ingredients.contains(recipeIngredient.getIngredientName())).collect(Collectors.toList());
-    }
-
-    public List<Recipe> getRecipesByUserId(Integer userId) {
-        Set<String> userRoles = authenticationFacade.getRoles();
-        String userEmail = authenticationFacade.getEmail();
-
-        User user = userRepository.findByEmail(userEmail)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
 
-        if (userRoles.contains("ROLE_ADMIN") || userId.equals(user.getId())) {
+        if (roles.contains("ROLE_ADMIN") || userId.equals(user.getId())) {
             logger.info("Returned all recipes from userId: '{}'", userId);
             return recipeRepository.findByUserId(userId);
         } else {
@@ -149,10 +114,10 @@ public class RecipeService {
 
     @Transactional
     public Recipe addRecipe(CreateRecipeDto createRecipeDto, HttpServletRequest request) {
-        String userEmail = extractUserEmailFromToken(request);
-
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException(userEmail));
+        Map<String, Object> userDetails = extractUserDetailsFromToken(request);
+        String email = (String) userDetails.get("email");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         String title = createRecipeDto.title();
         recipeRepository.findByTitle(title)
@@ -170,14 +135,14 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe editRecipe(Integer id, @Validated RecipeDto recipeDto) {
+    public Recipe editRecipe(Integer id, RecipeDto recipeDto, HttpServletRequest request) {
         var recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}", id);
                     return new RecipeNotFoundException(id);
                 });
 
-        if (isUserAuthorized(recipe)) {
+        if (isUserAuthorized(recipe, request)) {
             Recipe updatedRecipe = updateRecipe(recipe, recipeDto);
             logger.info("Recipe updated with id: '{}'", id);
             return recipeRepository.save(updatedRecipe);
@@ -188,18 +153,18 @@ public class RecipeService {
     }
 
     @Transactional
-    public void deleteRecipe(Integer id) {
+    public void deleteRecipe(Integer id, HttpServletRequest request) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}", id);
                     return new RecipeNotFoundException(id);
                 });
 
-        if (isUserAuthorized(recipe)) {
+        if (isUserAuthorized(recipe, request)) {
             try {
                 recipeRepository.deleteById(id);
                 logger.info("Recipe deleted with id: '{}'", id);
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.error("Failed to delete recipe with id: '{}'", id, e);
             }
         } else {
@@ -208,17 +173,18 @@ public class RecipeService {
         }
     }
 
-    private boolean isUserAuthorized(Recipe recipe) {
-        String userEmail = authenticationFacade.getEmail();
-        Set<String> userRoles = authenticationFacade.getRoles();
-        if(userEmail != null){
-            return userRoles.contains("ROLE_ADMIN") || userEmail.equals(recipe.getUser().getEmail());
-        }else{
+    private boolean isUserAuthorized(Recipe recipe, HttpServletRequest request) {
+        Map<String, Object> userDetails = extractUserDetailsFromToken(request);
+        String email = (String) userDetails.get("email");
+        List<String> roles = (List<String>) userDetails.get("roles");
+        if (email != null) {
+            return roles.contains("ROLE_ADMIN") || email.equals(recipe.getUser().getEmail());
+        } else {
             return false;
         }
     }
 
-    private String extractUserEmailFromToken(HttpServletRequest request) {
+    private Map<String, Object> extractUserDetailsFromToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
 
         if (token != null && token.startsWith("Bearer ")) {
@@ -228,9 +194,14 @@ public class RecipeService {
                     .build()
                     .parseClaimsJws(jwtToken)
                     .getBody();
-            return claims.getSubject();
+
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("email", claims.getSubject());
+            userDetails.put("roles", claims.get("scopes", List.class));
+
+            return userDetails;
         }
-        return null;
+        return new HashMap<>();
     }
 
     private Key getSigningKey() {

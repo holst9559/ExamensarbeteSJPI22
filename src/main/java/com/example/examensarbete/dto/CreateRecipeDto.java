@@ -24,7 +24,7 @@ public record CreateRecipeDto(
         @NotNull
         Boolean visible,
         @NotNull
-        Set<InstructionDto> instructions ,
+        Set<InstructionDto> instructions,
         @NotNull
         Set<RecipeIngredientDto> recipeIngredients,
         String imgUrl,

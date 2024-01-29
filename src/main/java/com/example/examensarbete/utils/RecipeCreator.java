@@ -64,7 +64,7 @@ public class RecipeCreator {
     }
 
     private void setDish(CreateRecipeDto createRecipeDto, Recipe recipe) {
-        if (createRecipeDto.dish() != null) {
+        if (createRecipeDto.dish().getName() != null) {
             Dish dish = dishRepository.findById(createRecipeDto.dish().getId())
                     .orElseThrow(() -> new EntityNotFoundException("Dish not found with id: " + createRecipeDto.dish().getId()));
             recipe.setDish(dish);
@@ -80,7 +80,7 @@ public class RecipeCreator {
     }
 
     private void setInstructions(CreateRecipeDto createRecipeDto, Recipe recipe) {
-        if (createRecipeDto.instructions() != null && !createRecipeDto.instructions().isEmpty()) {
+        if (!createRecipeDto.instructions().isEmpty()) {
             Set<Instruction> instructions = createRecipeDto.instructions().stream()
                     .map(instructionDto -> instructionRepository.save(new Instruction(instructionDto.step(), instructionDto.description())))
                     .collect(Collectors.toSet());
@@ -90,25 +90,25 @@ public class RecipeCreator {
     }
 
     private void setRecipeIngredients(CreateRecipeDto createRecipeDto, Recipe recipe) {
-        if (createRecipeDto.recipeIngredients() != null && !createRecipeDto.recipeIngredients().isEmpty()) {
+        if (!createRecipeDto.recipeIngredients().isEmpty()) {
             Set<RecipeIngredient> recipeIngredients = createRecipeDto.recipeIngredients().stream()
                     .map(ingredientDto -> {
-                        ingredientRepository.findByName(ingredientDto.ingredient().name()).orElseThrow(RuntimeException::new);
                         var unitCheck = unitRepository.findByName(ingredientDto.unit());
-                        if(unitCheck.isEmpty()){
+                        if (unitCheck.isEmpty()) {
                             Unit newUnit = createNewUnit(ingredientDto.unit());
+                            System.out.println("NEW UNIT");
+                            System.out.println(newUnit);
                             RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto, newUnit);
                             recipeIngredientRepository.save(newRecipeIngredient);
                             return newRecipeIngredient;
 
-
-                        }else {
+                        } else {
+                            System.out.println("EXISTING");
+                            System.out.println(unitCheck.get());
                             RecipeIngredient newRecipeIngredient = createNewRecipeIngredient(ingredientDto, unitCheck.get());
                             recipeIngredientRepository.save(newRecipeIngredient);
                             return newRecipeIngredient;
-
                         }
-
                     })
                     .collect(Collectors.toSet());
             recipe.setRecipeIngredients(recipeIngredients);
@@ -128,13 +128,16 @@ public class RecipeCreator {
         var ingredientCheck = ingredientRepository.findByName(ingredientDto.ingredient().name())
                 .orElseThrow(() -> new EntityNotFoundException("Ingredient not found with name: " + ingredientDto.ingredient().name()));
 
+
         recipeIngredient.setIngredient(ingredientCheck);
         recipeIngredient.setAmount(ingredientDto.amount());
         recipeIngredient.setUnit(unitCheck);
+        System.out.println(unitCheck.getRecipeIngredients());
         unitCheck.getRecipeIngredients().add(recipeIngredient);
 
         return recipeIngredient;
     }
+
 
     private Unit createNewUnit(String name) {
         Unit unit = new Unit();

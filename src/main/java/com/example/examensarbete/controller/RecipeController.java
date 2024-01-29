@@ -16,50 +16,45 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-//@CrossOrigin("http://localhost:3000/")
 @RequestMapping("api/v1/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
 
-    public RecipeController(RecipeService recipeService){
+    public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping
-    public List<Recipe> getAllPublicRecipes(){
-        return recipeService.getAllPublicRecipes();
+    public List<Recipe> getAllPublicRecipes(HttpServletRequest request) {
+        return recipeService.getAllPublicRecipes(request);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
-    public List<Recipe> getAllRecipes(){
+    public List<Recipe> getAllRecipes() {
         return recipeService.getAllRecipes();
     }
 
     @Transactional
     @GetMapping("/{id:\\d+}")
-    public Recipe getRecipeById(@PathVariable Integer id){
+    public Recipe getRecipeById(@PathVariable Integer id) {
         return recipeService.getRecipeById(id);
     }
 
     @GetMapping("/{title:.*\\D.*}")
-    public Recipe getRecipeByTitle(@PathVariable String title){
+    public Recipe getRecipeByTitle(@PathVariable String title) {
         return recipeService.getRecipeByTitle(title);
     }
 
-    @GetMapping("/search")
-    public List<Recipe> getRecipesWithIngredients(@RequestParam(value = "ingredients") List<String> ingredients){
-        return recipeService.getRecipesWithIngredients(ingredients);
-    }
 
     @GetMapping("/user/{userId:\\d+}")
-    public List<Recipe> getRecipesByUserId(@PathVariable Integer userId){
-        return recipeService.getRecipesByUserId(userId);
+    public List<Recipe> getRecipesByUserId(@PathVariable Integer userId, HttpServletRequest request) {
+        return recipeService.getRecipesByUserId(userId, request);
     }
 
     @PostMapping
-    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto, HttpServletRequest request){
+    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto, HttpServletRequest request) {
         var created = recipeService.addRecipe(recipeDto, request);
 
         URI locationURI = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(created.getId()).toUri();
@@ -68,13 +63,13 @@ public class RecipeController {
     }
 
     @PatchMapping("/{id:\\d+}")
-    public ResponseEntity<Recipe> editRecipe(@PathVariable Integer id,@RequestBody @Validated RecipeDto recipeDto){
-        return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
+    public ResponseEntity<Recipe> editRecipe(@PathVariable Integer id, @RequestBody @Validated RecipeDto recipeDto, HttpServletRequest request) {
+        return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto, request));
     }
 
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable Integer id){
-        recipeService.deleteRecipe(id);
+    public ResponseEntity<?> deleteRecipe(@PathVariable Integer id, HttpServletRequest request) {
+        recipeService.deleteRecipe(id, request);
         return ResponseEntity.noContent().build();
     }
 

@@ -2,7 +2,6 @@ package com.example.examensarbete.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 public record UserDto(

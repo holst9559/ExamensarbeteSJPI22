@@ -1,5 +1,6 @@
 package com.example.examensarbete.controller;
 
+import com.example.examensarbete.exception.AuthorizationException;
 import com.example.examensarbete.utils.AuthenticationRequest;
 import com.example.examensarbete.utils.AuthenticationResponse;
 import com.example.examensarbete.utils.RegisterRequest;
@@ -13,23 +14,22 @@ import org.springframework.http.ResponseEntity;
 import com.example.examensarbete.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 @RestController
-//@CrossOrigin("http://localhost:3000")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
-    private final AuthService authService;
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private final AuthService authService;
 
-
-    public AuthController(AuthService authService){
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) throws IOException {
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
+        logger.info("Received login request for user: {}", request.email());
         AuthenticationResponse responseObj = authService.login(request);
+
+        logger.info("Login successful for user: {}", request.email());
 
         Cookie cookie = new Cookie("JWT-TOKEN", responseObj.token());
         cookie.setHttpOnly(true);
@@ -38,6 +38,8 @@ public class AuthController {
         cookie.setSecure(true);
         response.addCookie(cookie);
 
+        logger.info("JWT token added to cookie for user: {}", request.email());
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, responseObj.token())
                 .body(responseObj);
@@ -45,11 +47,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) throws IOException{
-        System.out.println(request);
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        logger.info("Received registration request for user: {}", request.email());
 
         RegisterResponse response = authService.register(request);
-
+        logger.info("Registration successful for user: {}", request.email());
         return ResponseEntity.ok()
                 .body(response);
 

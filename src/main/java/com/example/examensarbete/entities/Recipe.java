@@ -127,16 +127,4 @@ public class Recipe implements Serializable {
                 "visible = " + visible + ", " +
                 "imgUrl = " + imgUrl + ")";
     }
-
-    private int calculateTotalTime(int prepTime, int cookTime){
-        return prepTime + cookTime;
-    }
-
-    public void addIngredient(RecipeIngredient recipeIngredient){
-        recipeIngredients.add(recipeIngredient);
-    }
-
-    public void addInstruction(Instruction instruction){
-        instructions.add(instruction);
-    }
 }

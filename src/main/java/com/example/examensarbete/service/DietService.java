@@ -10,14 +10,17 @@ import java.util.List;
 
 @Service
 public class DietService {
-    private static final Logger logger = LoggerFactory.getLogger(CategoryService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DietService.class);
     private final DietRepository dietRepository;
 
     public DietService(DietRepository dietRepository) {
         this.dietRepository = dietRepository;
     }
 
-    public List<Diet> getAllDiets(){
-        return dietRepository.findAll();
+    public List<Diet> getAllDiets() {
+        logger.info("Fetching all diets from the database");
+        List<Diet> diets = dietRepository.findAll();
+        logger.info("Fetched {} diets", diets.size());
+        return diets;
     }
 }

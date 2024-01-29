@@ -2,7 +2,6 @@ package com.example.examensarbete.controller;
 
 import com.example.examensarbete.entities.Diet;
 import com.example.examensarbete.service.DietService;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +18,7 @@ public class DietController {
     }
 
     @GetMapping
-    public List<Diet> getAllDiets(){
+    public List<Diet> getAllDiets() {
         return dietService.getAllDiets();
     }
 }

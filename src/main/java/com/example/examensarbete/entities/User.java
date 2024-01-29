@@ -42,7 +42,7 @@ public class User implements UserDetails {
                     @JoinColumn(name = "USER_ID")
             },
             inverseJoinColumns = {
-                    @JoinColumn(name = "ROLE_ID") })
+                    @JoinColumn(name = "ROLE_ID")})
     private Set<Role> roles;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)

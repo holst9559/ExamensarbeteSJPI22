@@ -3,11 +3,11 @@ package com.example.examensarbete.controller;
 import com.example.examensarbete.exception.AuthorizationException;
 import com.example.examensarbete.service.UserService;
 import com.example.examensarbete.entities.User;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -26,16 +26,15 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-
     @GetMapping("/{id:\\d+}")
-    public User getUserById(@PathVariable Integer id) throws AuthorizationException {
-        return userService.getUserById(id);
+    public User getUserById(@PathVariable Integer id, HttpServletRequest request) throws AuthorizationException {
+        return userService.getUserById(id, request);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer id) throws AuthorizationException {
-        userService.deleteUser(id);
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id, HttpServletRequest request) throws AuthorizationException {
+        userService.deleteUser(id, request);
         return ResponseEntity.status(403).build();
     }
 

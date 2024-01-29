@@ -36,19 +36,17 @@ public class RecipeIngredient implements Serializable {
     @JsonBackReference
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("recipeIngredients")
+    private Unit unit;
+    @NotNull
+    @Column(name = "amount")
+    private Double amount;
 
     @Transient
     public String getIngredientName() {
         return (ingredient != null) ? ingredient.getName() : null;
     }
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("recipeIngredients")
-    private Unit unit;
-
-    @NotNull
-    @Column(name = "amount")
-    private Double amount;
 
     @Override
     public final boolean equals(Object o) {

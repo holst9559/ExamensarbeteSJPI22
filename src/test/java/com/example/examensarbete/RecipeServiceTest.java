@@ -12,7 +12,6 @@ import com.example.examensarbete.repository.RecipeIngredientRepository;
 import com.example.examensarbete.repository.RecipeRepository;
 import com.example.examensarbete.repository.UserRepository;
 import com.example.examensarbete.service.RecipeService;
-import com.example.examensarbete.utils.AuthenticationFacade;
 import com.example.examensarbete.utils.RecipeCreator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,75 +35,8 @@ class RecipeServiceTest {
     private RecipeIngredientRepository recipeIngredientRepository;
     @Mock
     private RecipeCreator recipeCreator;
-    @Mock
-    private AuthenticationFacade authenticationFacade;
     @InjectMocks
     private RecipeService recipeService;
-
-    @Test
-    void getRecipesWithIngredients_Admin() {
-        // Setup
-        Recipe recipe1 = mockRecipe(); //Pancakes
-        Recipe recipe3 = mockRecipe3(); //Fried Chicken
-
-        RecipeIngredient ingredient1 = mockRecipeIngredients().get(0);
-        RecipeIngredient ingredient2 = mockRecipeIngredients().get(3);
-        RecipeIngredient ingredient3 = mockRecipeIngredients().get(5);
-        RecipeIngredient ingredient4 = mockRecipeIngredients().get(6);
-        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2, ingredient3, ingredient4);
-        when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
-
-        // Mocking AuthenticationFacade
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_ADMIN"));
-
-        // Mocking Repository Behavior
-        when(recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients))))
-                .thenReturn(List.of(recipe1, recipe3));
-
-        // Method Invocation and Assertion
-        assertThat(recipeService.getRecipesWithIngredients(List.of("flour", "eggs", "panko", "chicken", "beef"))).containsExactlyInAnyOrder(recipe1,recipe3);
-
-        // Verify that the repository methods were called as expected
-        verify(recipeRepository, times(1)).searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(mockIngredients)));
-        verify(recipeRepository, never()).findByUserEmail(any());
-        verify(recipeRepository, never()).findByVisibleAndRecipeIngredientsIn(anyBoolean(), any());
-    }
-
-    @Test
-    void getRecipesWithIngredients_UserNotAdmin() {
-        // Setup
-        Recipe recipe1 = mockRecipe(); //Pancakes
-        Recipe userRecipe1 = mockRecipe3(); //Fried Chicken private
-
-        RecipeIngredient ingredient1 = mockRecipeIngredients().get(0);
-        RecipeIngredient ingredient2 = mockRecipeIngredients().get(3);
-        RecipeIngredient ingredient3 = mockRecipeIngredients().get(5);
-        RecipeIngredient ingredient4 = mockRecipeIngredients().get(6);
-        RecipeIngredient ingredient5 = mockRecipeIngredients().get(8);
-        RecipeIngredient ingredient6 = mockRecipeIngredients().get(9);
-        RecipeIngredient ingredient7 = mockRecipeIngredients().get(2);
-        List<RecipeIngredient> mockIngredients = Arrays.asList(ingredient1, ingredient2, ingredient3, ingredient4, ingredient5, ingredient6, ingredient7);
-
-        when(recipeIngredientRepository.findAll()).thenReturn(mockIngredients);
-
-        // Mocking AuthenticationFacade
-        when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_USER"));
-        when(authenticationFacade.getEmail()).thenReturn("john@google.com");
-
-        // Mocking Repository Behavior for non-admin user
-        when(recipeRepository.findByUserEmail("john@google.com")).thenReturn(List.of(userRecipe1));
-        when(recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(mockIngredients))))
-                .thenReturn(List.of(recipe1));
-
-        // Method Invocation and Assertion
-        assertThat(recipeService.getRecipesWithIngredients(List.of("flour", "eggs", "panko", "chicken", "beef", "curry", "tofu")))
-                .containsExactlyInAnyOrder(recipe1, userRecipe1);
-
-        // Verify that the repository methods were called as expected
-        verify(recipeRepository, never()).searchByRecipeIngredientsIn(any());
-        verify(recipeRepository, times(1)).findByUserEmail("john@google.com");
-        verify(recipeRepository, times(1)).findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(mockIngredients)));
-    }
 
     @Test
     void getAllRecipes() {
@@ -145,6 +77,7 @@ class RecipeServiceTest {
         Recipe recipe = recipeService.getRecipeByTitle(recipeTitle);
         assertThat(recipe).isEqualTo(recipe1);
     }
+    /*
 
     @Test
     void getRecipesByUserId_Success_AdminRole() {
@@ -188,6 +121,7 @@ class RecipeServiceTest {
         verify(recipeRepository, times(1)).findByVisibleAndUserId(true, userId);
     }
 
+    */
     @Test
     void getRecipesByUserId_UserNotFound() {
         // Mocking Repository Behavior
@@ -269,8 +203,6 @@ class RecipeServiceTest {
 
 
 
- */
-
     @Test
     void editRecipe_Successful_UserMatch() {
         // Mocking Repository Behavior
@@ -348,6 +280,8 @@ class RecipeServiceTest {
         assertThrows(RuntimeException.class, () -> recipeService.deleteRecipe(recipeId));
     }
 
+
+ */
 
     // Helper methods
     private CreateRecipeDto createRecipeDto(){

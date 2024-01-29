@@ -19,6 +19,9 @@ public class CategoryService {
     }
 
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        logger.info("Fetching all categories from the database");
+        List<Category> categories = categoryRepository.findAll();
+        logger.info("Fetched {} categories", categories.size());
+        return categories;
     }
 }

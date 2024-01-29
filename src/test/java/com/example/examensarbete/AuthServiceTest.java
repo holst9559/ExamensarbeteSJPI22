@@ -1,73 +1,71 @@
 package com.example.examensarbete;
 
-import com.example.examensarbete.exception.MissingUserAttributeException;
+import com.example.examensarbete.controller.AuthController;
 import com.example.examensarbete.service.AuthService;
+import com.example.examensarbete.utils.AuthenticationRequest;
+import com.example.examensarbete.utils.AuthenticationResponse;
+import com.example.examensarbete.utils.RegisterRequest;
+import com.example.examensarbete.utils.RegisterResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
 
-    /*
-    @Mock
-    private OAuth2User mockPrincipal;
 
-    @InjectMocks
+    @Mock
     private AuthService authService;
 
+    @InjectMocks
+    private AuthController authController;
+
     @Test
-    void testGetUserData() {
-        // Mock OAuth2User attributes
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("given_name", "John");
-        attributes.put("family_name", "Doe");
-        attributes.put("name", "John Doe");
-        attributes.put("email", "john.doe@example.com");
-        attributes.put("picture", "https://example.com/picture.jpg");
+    void testLogin_Success() {
+        // Arrange
+        AuthenticationRequest request = new AuthenticationRequest("test@example.com", "password");
+        AuthenticationResponse mockResponse = new AuthenticationResponse("mockToken", null);
 
-        // Configure the mockPrincipal to return the mocked attributes
-        when(mockPrincipal.getAttributes()).thenReturn(attributes);
+        when(authService.login(request)).thenReturn(mockResponse);
 
-        // Call the method under test
-        GoogleUser googleUser = authService.getUserData(mockPrincipal);
+        HttpServletResponse mockResponseObject = mock(HttpServletResponse.class);
 
-        // Verify the results
-        assertEquals("John", googleUser.givenName());
-        assertEquals("Doe", googleUser.familyName());
-        assertEquals("John Doe", googleUser.fullName());
-        assertEquals("john.doe@example.com", googleUser.email());
-        assertEquals("https://example.com/picture.jpg", googleUser.picture());
+        // Act
+        ResponseEntity<?> responseEntity = authController.login(request, mockResponseObject);
+
+        // Assert
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(mockResponse, responseEntity.getBody());
+
+        verify(authService, times(1)).login(request);
+
+        // Verify cookie is set
+        verify(mockResponseObject, times(1)).addCookie(any(Cookie.class));
     }
 
     @Test
-    void testGetUserDataWithMissingAttribute() {
-        // Mock OAuth2User attributes with a missing attribute ("family_name")
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("given_name", "John");
-        attributes.put("name", "John Doe");
-        attributes.put("email", "john.doe@example.com");
-        attributes.put("picture", "https://example.com/picture.jpg");
+    void testRegister_Success() {
+        // Arrange
+        RegisterRequest request = new RegisterRequest("test@example.com", "John", "Doe", "password");
+        RegisterResponse mockResponse = new RegisterResponse("test@example.com", "John", "Doe");
 
-        // Configure the mockPrincipal to return the mocked attributes
-        when(mockPrincipal.getAttributes()).thenReturn(attributes);
+        when(authService.register(request)).thenReturn(mockResponse);
 
-        // Call the method under test
+        // Act
+        ResponseEntity<?> responseEntity = authController.register(request);
 
-        // Verify that the missing attribute does not cause an issue
-        assertThrows(MissingUserAttributeException.class, () -> authService.getUserData(mockPrincipal));
+        // Assert
+        assertEquals(200, responseEntity.getStatusCodeValue());
+        assertEquals(mockResponse, responseEntity.getBody());
+
+        verify(authService, times(1)).register(request);
     }
-
-     */
 }
