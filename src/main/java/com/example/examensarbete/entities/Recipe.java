@@ -24,7 +24,7 @@ public class Recipe implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id")
-    private Long id;
+    private Integer id;
 
     @NotEmpty
     @Column(name = "recipe_title")

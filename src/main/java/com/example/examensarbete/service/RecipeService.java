@@ -77,7 +77,7 @@ public class RecipeService {
         return recipeRepository.findByVisible(true);
     }
 
-    public Recipe getRecipeById(Long id) {
+    public Recipe getRecipeById(Integer id) {
         return recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}'",id);
@@ -96,26 +96,32 @@ public class RecipeService {
     public List<Recipe> getRecipesWithIngredients(List<String> ingredients) {
         Set<String> userRoles = authenticationFacade.getRoles();
 
+        List<RecipeIngredient> ingredientList = getFilteredRecipeIngredients(ingredients);
+
         if (userRoles.contains("ROLE_ADMIN")) {
+            System.out.println("ADMIN USER");
             logger.info("Returned all recipes, Admin call");
-            return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(getFilteredRecipeIngredients(ingredients)));
+            return recipeRepository.searchByRecipeIngredientsIn(Collections.singleton(new HashSet<>(ingredientList)));
         }
+
         //Check for mail validation??
         String userEmail = authenticationFacade.getEmail();
+        System.out.println("BEFORE USER");
         List<Recipe> userRecipes = recipeRepository.findByUserEmail(userEmail);
-        List<Recipe> publicRecipes = recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(getFilteredRecipeIngredients(ingredients)));
+        System.out.println("BEFORE PUBLIC");
+        List<Recipe> publicRecipes = recipeRepository.findByVisibleAndRecipeIngredientsIn(true, Collections.singleton(new HashSet<>(ingredientList)));
 
+        System.out.println("BEFORE CONCAT");
         return Stream.concat(userRecipes.stream(), publicRecipes.stream()).distinct().toList();
     }
 
-    private Set<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
+    private List<RecipeIngredient> getFilteredRecipeIngredients(List<String> ingredients) {
         List<RecipeIngredient> filteredIngredients = recipeIngredientRepository.findAll();
         return filteredIngredients.stream()
-                .filter(recipeIngredient -> ingredients.contains(recipeIngredient.getIngredientName()))
-                .collect(Collectors.toSet());
+                .filter(recipeIngredient -> ingredients.contains(recipeIngredient.getIngredientName())).collect(Collectors.toList());
     }
 
-    public List<Recipe> getRecipesByUserId(Long userId) {
+    public List<Recipe> getRecipesByUserId(Integer userId) {
         Set<String> userRoles = authenticationFacade.getRoles();
         String userEmail = authenticationFacade.getEmail();
 
@@ -151,7 +157,7 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe editRecipe(Long id, @Validated RecipeDto recipeDto) {
+    public Recipe editRecipe(Integer id, @Validated RecipeDto recipeDto) {
         var recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}", id);
@@ -169,7 +175,7 @@ public class RecipeService {
     }
 
     @Transactional
-    public void deleteRecipe(Long id) {
+    public void deleteRecipe(Integer id) {
         Recipe recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Recipe not found with id: '{}", id);

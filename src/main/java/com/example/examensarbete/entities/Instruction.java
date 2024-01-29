@@ -19,7 +19,7 @@ import java.util.Objects;
 public class Instruction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore

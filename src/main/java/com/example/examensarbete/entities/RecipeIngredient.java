@@ -21,7 +21,7 @@ public class RecipeIngredient implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_ingredient_id")
-    private Long id;
+    private Integer id;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JsonIgnore

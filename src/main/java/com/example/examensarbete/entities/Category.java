@@ -18,11 +18,11 @@ import java.util.Objects;
 public class Category implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "strategy_id")
+    @Column(name = "category_id")
     private Integer id;
 
     @NotEmpty
-    @Column(name = "strategy_name")
+    @Column(name = "category_name")
     private String name;
 
     public Category(String name) {

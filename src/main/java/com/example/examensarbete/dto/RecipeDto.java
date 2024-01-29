@@ -8,7 +8,7 @@ import java.util.Set;
 
 public record RecipeDto(
         @NotEmpty
-        Long id,
+        Integer id,
         @NotEmpty
         String title,
         @NotEmpty

@@ -28,7 +28,7 @@ import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 class RecipeServiceTest {
-    /*
+
 
     @Mock
     private RecipeRepository recipeRepository;
@@ -128,7 +128,7 @@ class RecipeServiceTest {
     @Test
     void getRecipeById() {
         // Mocking Repository Behavior
-        Long recipeId = 1L;
+        Integer recipeId = 1;
         Recipe recipe1 = mockRecipe(); //Pancakes
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(recipe1));
 
@@ -154,7 +154,7 @@ class RecipeServiceTest {
         // Mocking Repository Behavior
         Recipe recipe1 = mockRecipe(); //Pancakes
         User user = newUser(recipe1);
-        Long userId = 1L;
+        Integer userId = 1;
 
         when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_ADMIN"));
         when(authenticationFacade.getEmail()).thenReturn("test@google.com");
@@ -167,7 +167,7 @@ class RecipeServiceTest {
 
         // Verify that the repository methods were called as expected
         verify(recipeRepository, times(1)).findByUserId(userId);
-        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyLong());
+        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyInt());
     }
 
     @Test
@@ -175,7 +175,7 @@ class RecipeServiceTest {
         // Mocking Repository Behavior
         Recipe recipe1 = mockRecipe(); //Pancakes
         User user = newUser2(recipe1);
-        Long userId = 1L;
+        Integer userId = 1;
 
         when(authenticationFacade.getRoles()).thenReturn(Set.of("ROLE_USER"));
         when(authenticationFacade.getEmail()).thenReturn("john@google.com");
@@ -187,7 +187,7 @@ class RecipeServiceTest {
         assertThat(recipes).hasSize(1);
 
         // Verify that the repository methods were called as expected
-        verify(recipeRepository, never()).findByUserId(anyLong());
+        verify(recipeRepository, never()).findByUserId(anyInt());
         verify(recipeRepository, times(1)).findByVisibleAndUserId(true, userId);
     }
 
@@ -199,11 +199,11 @@ class RecipeServiceTest {
         assertThrows(RuntimeException.class, () -> userRepository.findByEmail("user@example.com"));
 
         // Verify that the repository methods were called as expected
-        verify(recipeRepository, never()).findByUserId(anyLong());
-        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyLong());
+        verify(recipeRepository, never()).findByUserId(anyInt());
+        verify(recipeRepository, never()).findByVisibleAndUserId(anyBoolean(), anyInt());
     }
 
-    /*
+/*
     @Test
     void addRecipe_Successful() {
         // Mocking Repository Behavior
@@ -250,7 +250,7 @@ class RecipeServiceTest {
     @Test
     void editRecipe_Successful_AdminRole() {
         // Mocking Repository Behavior
-        Long recipeId = 1L;
+        Integer recipeId = 1;
         RecipeDto recipeDto = RecipeDto();
         Recipe existingRecipe = mockRecipe();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
@@ -272,10 +272,12 @@ class RecipeServiceTest {
 
 
 
+ */
+
     @Test
     void editRecipe_Successful_UserMatch() {
         // Mocking Repository Behavior
-        Long recipeId = 3L;
+        Integer recipeId = 3;
         RecipeDto recipeDto = RecipeDto2();
         Recipe existingRecipe = mockRecipe3();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
@@ -299,7 +301,7 @@ class RecipeServiceTest {
     @Test
     void editRecipe_RecipeNotFound() {
         // Mocking Repository Behavior
-        Long recipeId = 1L;
+        Integer recipeId = 1;
         RecipeDto recipeDto = RecipeDto();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.empty());
 
@@ -310,7 +312,7 @@ class RecipeServiceTest {
     @Test
     void deleteRecipe_Successful_AdminRole() {
         // Mocking Repository Behavior
-        Long recipeId = 1L;
+        Integer recipeId = 1;
         Recipe existingRecipe = mockRecipe();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
         when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_ADMIN"));
@@ -326,7 +328,7 @@ class RecipeServiceTest {
     @Test
     void deleteRecipe_Successful_UserMatch() {
         // Mocking Repository Behavior
-        Long recipeId = 3L;
+        Integer recipeId = 3;
         Recipe existingRecipe = mockRecipe3();
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.of(existingRecipe));
         when(authenticationFacade.getRoles()).thenReturn(Set.of("OIDC_USER"));
@@ -342,7 +344,7 @@ class RecipeServiceTest {
     @Test
     void deleteRecipe_RecipeNotFound() {
         // Mocking Repository Behavior
-        Long recipeId = 1L;
+        Integer recipeId = 1;
         when(recipeRepository.findById(recipeId)).thenReturn(Optional.empty());
 
         // Method Invocation and Assertion
@@ -381,10 +383,10 @@ class RecipeServiceTest {
         instructions.add(createNewInstruction("2", "Cook"));
 
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
-        recipeIngredients.add(createRecipeIngredient(1L,"flour", 200.0, "gram"));
-        recipeIngredients.add(createRecipeIngredient(4L,"eggs", 2.0, "pcs"));
+        recipeIngredients.add(createRecipeIngredient(1,"flour", 200.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(4,"eggs", 2.0, "pcs"));
 
-        return new RecipeDto(1L,
+        return new RecipeDto(1,
                 "Pancakes",
                 newUser(null),
                 new Dish("Other"),
@@ -408,12 +410,12 @@ class RecipeServiceTest {
         instructions.add(createNewInstruction("2", "Cook"));
 
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
-        recipeIngredients.add(createRecipeIngredient(2L,"flour", 50.0, "gram"));
-        recipeIngredients.add(createRecipeIngredient(5L,"eggs", 3.0, "pcs"));
-        recipeIngredients.add(createRecipeIngredient(6L,"panko", 80.0, "gram"));
-        recipeIngredients.add(createRecipeIngredient(7L,"chicken", 400.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(2,"flour", 50.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(5,"eggs", 3.0, "pcs"));
+        recipeIngredients.add(createRecipeIngredient(6,"panko", 80.0, "gram"));
+        recipeIngredients.add(createRecipeIngredient(7,"chicken", 400.0, "gram"));
 
-        return new RecipeDto(3L,
+        return new RecipeDto(3,
                 "Fried Chicken",
                 newUser(null),
                 new Dish("Main Course"),
@@ -432,7 +434,7 @@ class RecipeServiceTest {
     }
 
 
-    private RecipeIngredient createRecipeIngredient(Long id, String ingredientName, Double amount, String unit) {
+    private RecipeIngredient createRecipeIngredient(Integer id, String ingredientName, Double amount, String unit) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(ingredientName);
         RecipeIngredient recipeIngredient = new RecipeIngredient();
@@ -484,7 +486,7 @@ class RecipeServiceTest {
         recipe.setVisible(true);
         recipe.setCookTime(10);
         recipe.setPrepTime(20);
-        recipe.setId(1L);
+        recipe.setId(1);
         recipe.setDescription("Easy pancakes");
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
@@ -517,7 +519,7 @@ class RecipeServiceTest {
         recipe.setVisible(false);
         recipe.setCookTime(10);
         recipe.setPrepTime(20);
-        recipe.setId(2L);
+        recipe.setId(2);
         recipe.setDescription("Tasty tofu curry");
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
@@ -554,7 +556,7 @@ class RecipeServiceTest {
         recipe.setVisible(false);
         recipe.setCookTime(10);
         recipe.setPrepTime(20);
-        recipe.setId(3L);
+        recipe.setId(3);
         recipe.setDescription("Crispy chicken");
         Set<RecipeIngredient> recipeIngredients = new HashSet<>();
 
@@ -577,11 +579,10 @@ class RecipeServiceTest {
 
     private User newUser(Recipe recipes) {
         User user = new User();
-        user.setId(1L);
+        user.setId(1);
         user.setEmail("test@google.com");
         user.setFirstName("Anton");
         user.setLastName("Holst");
-        user.setFullName("Anton Holst");
         Set<Recipe> recipeSet = new HashSet<>();
         recipeSet.add(recipes);
         user.setRecipes(recipeSet);
@@ -590,11 +591,10 @@ class RecipeServiceTest {
     }
     private User newUser2(Recipe recipes) {
         User user = new User();
-        user.setId(2L);
+        user.setId(2);
         user.setEmail("john@google.com");
         user.setFirstName("John");
         user.setLastName("Doe");
-        user.setFullName("John Doe");
         Set<Recipe> recipeSet = new HashSet<>();
         recipeSet.add(recipes);
         user.setRecipes(recipeSet);
@@ -604,16 +604,16 @@ class RecipeServiceTest {
 
     private List<RecipeIngredient> mockRecipeIngredients(){
         List<RecipeIngredient> recipeIngredients = new ArrayList<>();
-        RecipeIngredient ingredient1 = createRecipeIngredient(1L,"flour", 200.0, "gram");
-        RecipeIngredient ingredient2 = createRecipeIngredient(2L,"flour", 50.0, "gram");
-        RecipeIngredient ingredient3 = createRecipeIngredient(3L,"flour", 15.0, "gram");
-        RecipeIngredient ingredient4 = createRecipeIngredient(4L,"eggs", 2.0, "pcs");
-        RecipeIngredient ingredient5 = createRecipeIngredient(5L,"eggs", 3.0, "pcs");
-        RecipeIngredient ingredient6 = createRecipeIngredient(6L,"panko", 80.0, "gram");
-        RecipeIngredient ingredient7 = createRecipeIngredient(7L,"chicken", 400.0, "gram");
-        RecipeIngredient ingredient8 = createRecipeIngredient(8L,"beef", 200.0, "gram");
-        RecipeIngredient ingredient9 = createRecipeIngredient(9L,"curry", 20.0, "gram");
-        RecipeIngredient ingredient10 = createRecipeIngredient(10L,"tofu", 200.0, "gram");
+        RecipeIngredient ingredient1 = createRecipeIngredient(1,"flour", 200.0, "gram");
+        RecipeIngredient ingredient2 = createRecipeIngredient(2,"flour", 50.0, "gram");
+        RecipeIngredient ingredient3 = createRecipeIngredient(3,"flour", 15.0, "gram");
+        RecipeIngredient ingredient4 = createRecipeIngredient(4,"eggs", 2.0, "pcs");
+        RecipeIngredient ingredient5 = createRecipeIngredient(5,"eggs", 3.0, "pcs");
+        RecipeIngredient ingredient6 = createRecipeIngredient(6,"panko", 80.0, "gram");
+        RecipeIngredient ingredient7 = createRecipeIngredient(7,"chicken", 400.0, "gram");
+        RecipeIngredient ingredient8 = createRecipeIngredient(8,"beef", 200.0, "gram");
+        RecipeIngredient ingredient9 = createRecipeIngredient(9,"curry", 20.0, "gram");
+        RecipeIngredient ingredient10 = createRecipeIngredient(10,"tofu", 200.0, "gram");
 
         recipeIngredients.add(ingredient1);
         recipeIngredients.add(ingredient2);
@@ -628,7 +628,7 @@ class RecipeServiceTest {
 
         return recipeIngredients;
     }
-    */
+
 }
 
 

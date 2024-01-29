@@ -5,7 +5,7 @@ public class RecipeNotFoundException extends ResourceNotFoundException{
         super("Recipe not found");
     }
 
-    public RecipeNotFoundException(Long id) {
+    public RecipeNotFoundException(Integer id) {
         super("Recipe not found with id: " + id);
     }
 

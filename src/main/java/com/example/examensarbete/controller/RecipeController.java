@@ -25,10 +25,9 @@ public class RecipeController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping(produces = "application/json")
-    public ResponseEntity<List<Recipe>> getAllPublicRecipes(){
-        List<Recipe> recipes = recipeService.getAllPublicRecipes();
-        return ResponseEntity.ok().body(recipes);
+    @GetMapping
+    public List<Recipe> getAllPublicRecipes(){
+        return recipeService.getAllPublicRecipes();
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -38,7 +37,7 @@ public class RecipeController {
     }
 
     @GetMapping("/{id:\\d+}")
-    public Recipe getRecipeById(@PathVariable Long id){
+    public Recipe getRecipeById(@PathVariable Integer id){
         return recipeService.getRecipeById(id);
     }
 
@@ -53,7 +52,7 @@ public class RecipeController {
     }
 
     @GetMapping("/{userId:\\d+}")
-    public List<Recipe> getRecipesByUserId(@PathVariable Long userId){
+    public List<Recipe> getRecipesByUserId(@PathVariable Integer userId){
         return recipeService.getRecipesByUserId(userId);
     }
 
@@ -67,12 +66,12 @@ public class RecipeController {
     }
 
     @PatchMapping("/{id:\\d+}")
-    public ResponseEntity<Recipe> editRecipe(@PathVariable Long id,@RequestBody @Validated RecipeDto recipeDto){
+    public ResponseEntity<Recipe> editRecipe(@PathVariable Integer id,@RequestBody @Validated RecipeDto recipeDto){
         return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
     }
 
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable Long id){
+    public ResponseEntity<?> deleteRecipe(@PathVariable Integer id){
         recipeService.deleteRecipe(id);
         return ResponseEntity.noContent().build();
     }
