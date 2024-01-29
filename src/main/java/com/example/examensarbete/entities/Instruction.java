@@ -1,5 +1,6 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -18,9 +19,10 @@ import java.util.Objects;
 public class Instruction implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
@@ -31,12 +33,6 @@ public class Instruction implements Serializable {
     @NotEmpty
     @Column(name = "description")
     private String description;
-
-    public Instruction(Recipe recipe, String step, String description) {
-        this.recipe = recipe;
-        this.step = step;
-        this.description = description;
-    }
 
     public Instruction(String step, String description) {
         this.step = step;

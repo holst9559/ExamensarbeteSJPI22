@@ -18,13 +18,13 @@ import java.util.Objects;
 public class Ingredient implements Serializable {
     @Id
     @Column(name = "ingredient_id")
-    private Long id;
+    private Integer id;
 
     @NotEmpty
     @Column(name = "ingredient_name")
     private String name;
 
-    public Ingredient(Long id, String name) {
+    public Ingredient(Integer id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -46,7 +46,7 @@ public class Ingredient implements Serializable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Ingredient{" +
                 "id" + id +
                 "name'" + name + '\'' +

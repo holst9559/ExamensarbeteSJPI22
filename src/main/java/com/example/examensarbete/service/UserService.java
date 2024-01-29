@@ -1,48 +1,48 @@
 package com.example.examensarbete.service;
 
-import com.example.examensarbete.dto.GoogleUser;
-import com.example.examensarbete.entities.Recipe;
 import com.example.examensarbete.entities.User;
 import com.example.examensarbete.exception.AuthorizationException;
 import com.example.examensarbete.exception.UserNotFoundException;
 import com.example.examensarbete.repository.UserRepository;
-import com.example.examensarbete.utils.AuthenticationFacade;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
-import javax.naming.AuthenticationException;
-import java.nio.file.AccessDeniedException;
+import java.security.Key;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 @Service
 public class UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
-    private final AuthenticationFacade authenticationFacade;
+    @Value("${JWT_SECRET}")
+    private String SECRET_KEY;
 
-    public UserService(UserRepository userRepository,
-                       AuthenticationFacade authenticationFacade) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.authenticationFacade = authenticationFacade;
     }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) throws AuthorizationException {
+
+    public User getUserById(Integer id, HttpServletRequest request) throws AuthorizationException {
         var user = userRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("User not found with id: '{}", id);
                     return new UserNotFoundException(id);
                 });
 
-        if (isUserAuthorized(id)) {
+        if (isUserAuthorized(id, request)) {
             logger.info("User was returned successfully");
             return user;
         } else {
@@ -52,42 +52,13 @@ public class UserService {
     }
 
     @Transactional
-    public void addUser(@Validated GoogleUser googleUser) {
-        var userCheck = userRepository.findByEmail(googleUser.email());
-        if (userCheck.isEmpty()) {
-            User user = updateUserMethod(new User(), googleUser);
-            userRepository.save(user);
-        } else {
-            logger.error("Email is already registered with email: '{}'", googleUser.email());
-            throw new IllegalArgumentException("Email is already registered.");
-        }
-    }
-
-    @Transactional
-    public void updateUser(@Validated GoogleUser googleUser) {
-        userRepository.findByEmail(googleUser.email())
-                .ifPresentOrElse(
-                        existingUser -> {
-                            User userToUpdate = updateUserMethod(existingUser, googleUser);
-                            try {
-                                userRepository.save(userToUpdate);
-                                logger.info("User with email: '{}' was updated. Details: {}", googleUser.email(), getUpdateDetails(userToUpdate, googleUser));
-                            } catch (Exception e) {
-                                logger.error("Failed to update user with email: '{}'", googleUser.email(), e);
-                            }
-                        },
-                        () -> logger.warn("User with email: '{}' not found. Update skipped.", googleUser.email())
-                );
-    }
-
-    @Transactional
-    public void deleteUser(Long id) throws AuthorizationException {
+    public void deleteUser(Integer id, HttpServletRequest request) throws AuthorizationException {
         User user = userRepository.findById(id).orElseThrow(() -> {
             logger.error("User not found with id: '{}", id);
             return new UserNotFoundException(id);
         });
 
-        if (isUserAuthorized(id)) {
+        if (isUserAuthorized(id, request)) {
             try {
                 userRepository.delete(user);
                 logger.info("User with id: '{}' was deleted", id);
@@ -101,35 +72,36 @@ public class UserService {
         }
     }
 
-    private User updateUserMethod(User user, GoogleUser googleUser) {
-        user.setFirstName(googleUser.givenName());
-        user.setLastName(googleUser.familyName());
-        user.setFullName(googleUser.fullName());
-        user.setEmail(googleUser.email());
-        user.setPictureUrl(googleUser.picture());
-        return user;
-    }
-
-    public boolean isUserAuthorized(Long id) {
+    public boolean isUserAuthorized(Integer id, HttpServletRequest request) {
         var userCheck = userRepository.findById(id);
-        String userEmail = authenticationFacade.getEmail();
-        Set<String> userRoles = authenticationFacade.getRoles();
+        Map<String, Object> userDetails = extractUserDetailsFromToken(request);
+        String email = (String) userDetails.get("email");
+        List<String> roles = (List<String>) userDetails.get("roles");
 
-        return userRoles.contains("ROLE_ADMIN") || userCheck.isPresent() && userEmail.equals(userCheck.get().getEmail());
+        return roles.contains("ROLE_ADMIN") || userCheck.isPresent() && email.equals(userCheck.get().getEmail());
     }
 
-    private String getUpdateDetails(User updatedUser, GoogleUser googleUser) {
-        StringBuilder details = new StringBuilder("Updated details:\n");
+    private Map<String, Object> extractUserDetailsFromToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
 
-        if (!updatedUser.getFirstName().equals(googleUser.givenName())) {
-            details.append("First Name: ").append(googleUser.givenName()).append("\n");
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwtToken = token.substring(7);
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(jwtToken)
+                    .getBody();
+
+            Map<String, Object> userDetails = new HashMap<>();
+            userDetails.put("email", claims.getSubject());
+            userDetails.put("roles", claims.get("scopes", List.class));
+
+            return userDetails;
         }
-
-        if (!updatedUser.getLastName().equals(googleUser.familyName())) {
-            details.append("Last Name: ").append(googleUser.familyName()).append("\n");
-        }
-
-        return details.toString();
+        return new HashMap<>();
     }
 
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    }
 }

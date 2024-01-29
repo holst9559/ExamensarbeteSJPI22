@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public record IngredientDto(
         @NotNull
-        Long id,
+        Integer id,
         @NotEmpty
         String name
 ) implements Serializable {

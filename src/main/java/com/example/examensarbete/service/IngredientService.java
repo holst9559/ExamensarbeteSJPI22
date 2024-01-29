@@ -37,7 +37,7 @@ public class IngredientService {
         return ingredientRepository.findAll();
     }
 
-    public Ingredient getIngredientById(Long id) {
+    public Ingredient getIngredientById(Integer id) {
         return ingredientRepository.findById(id)
                 .orElseThrow(() -> {
                     logger.error("Ingredient not found with id: '{}'", id);
@@ -69,7 +69,7 @@ public class IngredientService {
 
 
     @Transactional
-    public Ingredient editIngredient(Long id, @Validated IngredientDto ingredientDto) {
+    public Ingredient editIngredient(Integer id, @Validated IngredientDto ingredientDto) {
         return ingredientRepository.findById(id)
                 .map(ingredientToUpdate -> {
                     ingredientToUpdate.setId(ingredientDto.id());
@@ -83,7 +83,7 @@ public class IngredientService {
     }
 
     @Transactional
-    public void deleteIngredient(Long id) {
+    public void deleteIngredient(Integer id) {
         ingredientRepository.findById(id)
                 .ifPresentOrElse(ingredientRepository::delete,
                         () -> {

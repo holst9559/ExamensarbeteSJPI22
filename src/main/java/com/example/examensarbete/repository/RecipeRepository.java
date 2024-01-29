@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface RecipeRepository extends JpaRepository<Recipe, Long> {
+public interface RecipeRepository extends JpaRepository<Recipe, Integer> {
     Optional<Recipe> findByTitle(String title);
     List<Recipe> searchByRecipeIngredientsIn(Collection<Set<RecipeIngredient>> recipeIngredients);
     List<Recipe> findByVisibleAndRecipeIngredientsIn(Boolean visible, Collection<Set<RecipeIngredient>> recipeIngredients);
-    List<Recipe> findByUserId(Long userId);
-    List<Recipe> findByVisibleAndUserId(Boolean visible, Long userId);
+    List<Recipe> findByUserId(Integer userId);
+    List<Recipe> findByVisibleAndUserId(Boolean visible, Integer userId);
     List<Recipe> findByVisible(Boolean visible);
     List<Recipe> findByUserEmail(String email);
 }

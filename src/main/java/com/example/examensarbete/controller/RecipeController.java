@@ -1,21 +1,13 @@
 package com.example.examensarbete.controller;
 
 import com.example.examensarbete.dto.CreateRecipeDto;
-import com.example.examensarbete.dto.GoogleUser;
 import com.example.examensarbete.dto.RecipeDto;
 import com.example.examensarbete.entities.Recipe;
-import com.example.examensarbete.entities.User;
-import com.example.examensarbete.repository.UserRepository;
-import com.example.examensarbete.service.AuthService;
 import com.example.examensarbete.service.RecipeService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,44 +20,42 @@ import java.util.List;
 public class RecipeController {
     private final RecipeService recipeService;
 
-    public RecipeController(RecipeService recipeService){
+    public RecipeController(RecipeService recipeService) {
         this.recipeService = recipeService;
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping
-    public List<Recipe> getAllPublicRecipes(){
-        return recipeService.getAllPublicRecipes();
+    public List<Recipe> getAllPublicRecipes(HttpServletRequest request) {
+        return recipeService.getAllPublicRecipes(request);
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/all")
-    public List<Recipe> getAllRecipes(){
+    public List<Recipe> getAllRecipes() {
         return recipeService.getAllRecipes();
     }
 
+    @Transactional
     @GetMapping("/{id:\\d+}")
-    public Recipe getRecipeById(@PathVariable Long id){
+    public Recipe getRecipeById(@PathVariable Integer id) {
         return recipeService.getRecipeById(id);
     }
 
-    @GetMapping("/{title}")
-    public Recipe getRecipeByTitle(@PathVariable String title){
+    @GetMapping("/{title:.*\\D.*}")
+    public Recipe getRecipeByTitle(@PathVariable String title) {
         return recipeService.getRecipeByTitle(title);
     }
 
-    @GetMapping("/search")
-    public List<Recipe> getRecipesWithIngredients(@RequestParam(value = "ingredients") List<String> ingredients){
-        return recipeService.getRecipesWithIngredients(ingredients);
-    }
 
-    @GetMapping("/{userId:\\d+}")
-    public List<Recipe> getRecipesByUserId(@PathVariable Long userId){
-        return recipeService.getRecipesByUserId(userId);
+    @GetMapping("/user/{userId:\\d+}")
+    public List<Recipe> getRecipesByUserId(@PathVariable Integer userId, HttpServletRequest request) {
+        return recipeService.getRecipesByUserId(userId, request);
     }
 
     @PostMapping
-    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto){
-        var created = recipeService.addRecipe(recipeDto);
+    public ResponseEntity<Recipe> addRecipe(@RequestBody @Validated CreateRecipeDto recipeDto, HttpServletRequest request) {
+        var created = recipeService.addRecipe(recipeDto, request);
 
         URI locationURI = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(created.getId()).toUri();
 
@@ -73,13 +63,13 @@ public class RecipeController {
     }
 
     @PatchMapping("/{id:\\d+}")
-    public ResponseEntity<Recipe> editRecipe(@PathVariable Long id,@RequestBody @Validated RecipeDto recipeDto){
-        return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto));
+    public ResponseEntity<Recipe> editRecipe(@PathVariable Integer id, @RequestBody @Validated RecipeDto recipeDto, HttpServletRequest request) {
+        return ResponseEntity.ok().body(recipeService.editRecipe(id, recipeDto, request));
     }
 
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable Long id){
-        recipeService.deleteRecipe(id);
+    public ResponseEntity<?> deleteRecipe(@PathVariable Integer id, HttpServletRequest request) {
+        recipeService.deleteRecipe(id, request);
         return ResponseEntity.noContent().build();
     }
 

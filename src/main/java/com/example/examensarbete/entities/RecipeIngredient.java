@@ -1,5 +1,7 @@
 package com.example.examensarbete.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -20,28 +22,31 @@ public class RecipeIngredient implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_ingredient_id")
-    private Long id;
+    private Integer id;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "recipe_ingredient_usage", joinColumns = @JoinColumn(name = "recipe_ingredient_id"), inverseJoinColumns = @JoinColumn(name = "recipe_id"))
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
+    @JoinTable(
+            name = "recipe_ingredient_usage",
+            joinColumns = @JoinColumn(name = "recipe_ingredient_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipe_id"))
     private Set<Recipe> recipe;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonBackReference
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("recipeIngredients")
+    private Unit unit;
+    @NotNull
+    @Column(name = "amount")
+    private Double amount;
 
     @Transient
     public String getIngredientName() {
         return (ingredient != null) ? ingredient.getName() : null;
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "unit_id")
-    private Unit unit;
-
-    @NotNull
-    @Column(name = "amount")
-    private Double amount;
 
     @Override
     public final boolean equals(Object o) {

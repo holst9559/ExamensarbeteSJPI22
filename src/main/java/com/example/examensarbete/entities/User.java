@@ -1,17 +1,16 @@
 package com.example.examensarbete.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.*;
 
 @Getter
@@ -19,10 +18,10 @@ import java.util.*;
 @Entity
 @NoArgsConstructor
 @Table(name = "USER")
-public class User implements Serializable {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "first_name")
     private String firstName;
@@ -30,32 +29,27 @@ public class User implements Serializable {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "full_name")
-    private String fullName;
-
     @NotEmpty
     @Column(name = "email")
     private String email;
 
-    @Column(name = "picture_url")
-    private String pictureUrl;
+    @Column(name = "password")
+    private String password;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "USER_ROLES",
+            joinColumns = {
+                    @JoinColumn(name = "USER_ID")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "ROLE_ID")})
+    private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Set<Recipe> recipes = new HashSet<>();
 
-    public User(String firstName, String lastName, String email, Set<Recipe> recipes) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.recipes = recipes;
-    }
-
-    public User(String firstName, String lastName, String fullName, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.fullName = fullName;
-        this.email = email;
+    public User(String username, String password, Set<SimpleGrantedAuthority> authority) {
     }
 
     @Override
@@ -72,5 +66,35 @@ public class User implements Serializable {
     @Override
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

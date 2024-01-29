@@ -1,6 +1,6 @@
 package com.example.examensarbete.entities;
 
-/*
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -25,10 +25,6 @@ public class Role implements Serializable {
     @Column(name = "role_name")
     private String name;
 
-    public Role(String name) {
-        this.name = name;
-    }
-
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
@@ -46,4 +42,4 @@ public class Role implements Serializable {
     }
 }
 
- */
+

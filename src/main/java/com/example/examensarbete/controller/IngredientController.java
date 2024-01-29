@@ -14,6 +14,7 @@ import java.net.URI;
 import java.util.*;
 
 @RestController
+@CrossOrigin("http://localhost:3000")
 @RequestMapping("api/v1/ingredients")
 public class IngredientController {
     private final IngredientService ingredientService;
@@ -28,7 +29,7 @@ public class IngredientController {
     }
 
     @GetMapping("/{id:\\d+}")
-    public Ingredient getIngredientById(@PathVariable Long id) {
+    public Ingredient getIngredientById(@PathVariable Integer id) {
         return ingredientService.getIngredientById(id);
     }
 
@@ -48,13 +49,13 @@ public class IngredientController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping("/{id:\\d+}")
-    public ResponseEntity<Ingredient> editIngredient(@PathVariable Long id, @RequestBody @Validated IngredientDto ingredient) {
+    public ResponseEntity<Ingredient> editIngredient(@PathVariable Integer id, @RequestBody @Validated IngredientDto ingredient) {
         return ResponseEntity.ok().body(ingredientService.editIngredient(id, ingredient));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id:\\d+}")
-    public ResponseEntity<?> deleteIngredient(@PathVariable Long id) {
+    public ResponseEntity<?> deleteIngredient(@PathVariable Integer id) {
         ingredientService.deleteIngredient(id);
         return ResponseEntity.noContent().build();
     }

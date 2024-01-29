@@ -36,8 +36,8 @@ class IngredientServiceTest {
     void getAllIngredients() {
         // Mocking Repository Behavior
         when(ingredientRepository.findAll()).thenReturn(List.of(
-                createIngredient(1L, "Flour"),
-                createIngredient(2L, "Sugar")
+                createIngredient(1, "Flour"),
+                createIngredient(2, "Sugar")
         ));
 
         // Method Invocation and Assertion
@@ -48,7 +48,7 @@ class IngredientServiceTest {
     @Test
     void getIngredientById_IngredientFound() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         Ingredient ingredient = createIngredient(ingredientId, "Flour");
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
 
@@ -60,7 +60,7 @@ class IngredientServiceTest {
     @Test
     void getIngredientById_IngredientNotFound() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
 
         // Method Invocation and Assertion
@@ -71,7 +71,7 @@ class IngredientServiceTest {
     void getIngredientByName_IngredientFound() {
         // Mocking Repository Behavior
         String ingredientName = "Flour";
-        Ingredient ingredient = createIngredient(1L, ingredientName);
+        Ingredient ingredient = createIngredient(1, ingredientName);
         when(ingredientRepository.findByName(ingredientName)).thenReturn(Optional.of(ingredient));
 
         // Method Invocation and Assertion
@@ -104,7 +104,7 @@ class IngredientServiceTest {
     void addIngredient_IngredientAlreadyExists() {
         // Mocking Repository Behavior
         IngredientDto ingredientDto = createIngredientDto("Flour");
-        when(ingredientRepository.findByName(ingredientDto.name())).thenReturn(Optional.of(createIngredient(1L, "Flour")));
+        when(ingredientRepository.findByName(ingredientDto.name())).thenReturn(Optional.of(createIngredient(1, "Flour")));
 
         // Method Invocation and Assertion
         assertThrows(IngredientAlreadyExistException.class, () -> ingredientService.addIngredient(ingredientDto));
@@ -114,7 +114,7 @@ class IngredientServiceTest {
     @Test
     void editIngredient_IngredientExists() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         IngredientDto ingredientDto = createIngredientDto("Sugar");
         Ingredient existingIngredient = createIngredient(ingredientId, "Flour");
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(existingIngredient));
@@ -135,7 +135,7 @@ class IngredientServiceTest {
     @Test
     void editIngredient_IngredientDoesNotExist() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         IngredientDto ingredientDto = createIngredientDto("Sugar");
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
 
@@ -147,7 +147,7 @@ class IngredientServiceTest {
     @Test
     void deleteIngredient_IngredientExists() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         Ingredient existingIngredient = createIngredient(ingredientId, "Flour");
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(existingIngredient));
 
@@ -159,16 +159,16 @@ class IngredientServiceTest {
     @Test
     void deleteIngredient_IngredientDoesNotExist() {
         // Mocking Repository Behavior
-        Long ingredientId = 1L;
+        Integer ingredientId = 1;
         when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
 
         // Method Invocation and Assertion
         assertThrows(RuntimeException.class, () -> ingredientService.deleteIngredient(ingredientId));
-        verify(ingredientRepository, never()).deleteById(anyLong());
+        verify(ingredientRepository, never()).deleteById(anyInt());
     }
 
     // Helper methods
-    private Ingredient createIngredient(Long id, String name) {
+    private Ingredient createIngredient(Integer id, String name) {
         Ingredient ingredient = new Ingredient();
         ingredient.setId(id);
         ingredient.setName(name);
@@ -177,7 +177,7 @@ class IngredientServiceTest {
 
     private IngredientDto createIngredientDto(String name) {
         return new IngredientDto(
-                1L,
+                1,
                 name
         );
 
